@@ -1,5 +1,5 @@
 #!/bin/sh
-# dowload "HD포토" pictures from topstarnews for a passed search
+# download "HD포토" pictures from topstarnews for a passed search
 #	try what results you get in a browser, Hangul usually works best
 [ -z "$1" ] && printf "usage: tzu SEARCHTERMS\n" && exit 0
 

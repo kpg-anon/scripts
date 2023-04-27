@@ -38,7 +38,7 @@ def split_by_manifest(filename, manifest, vcodec="copy", acodec="copy",
             print("Format not supported. File must be a csv or json file")
             raise SystemExit
 
-        split_cmd = ["/home/shigeto/scripts/binaries/ffmpeg", "-i", filename, "-vcodec", vcodec,
+        split_cmd = ["ffmpeg", "-i", filename, "-vcodec", vcodec,
                      "-acodec", acodec, "-y"] + shlex.split(extra)
         try:
             fileext = filename.split(".")[-1]
