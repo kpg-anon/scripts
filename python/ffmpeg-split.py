@@ -100,7 +100,7 @@ def split_by_seconds(filename, split_length, vcodec="copy", acodec="copy",
         print("Video length is less then the target split length.")
         raise SystemExit
 
-    split_cmd = ["/home/shigeto/scripts/binaries/ffmpeg", "-i", filename, "-vcodec", vcodec, "-acodec", acodec] + shlex.split(extra)
+    split_cmd = ["ffmpeg", "-i", filename, "-vcodec", vcodec, "-acodec", acodec] + shlex.split(extra)
     try:
         filebase = ".".join(filename.split(".")[:-1])
         fileext = filename.split(".")[-1]
