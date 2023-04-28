@@ -39,17 +39,23 @@ else
   urls=($(cat "$urls_file"))
 fi
 
+# Create Albums directory if it doesn't already exist
+mkdir -p "Albums"
+
 for url in "${urls[@]}"; do
   # Get album name from title tag
   title=$(curl -s "$url" | sed -n 's/.*<title>\(.*\)<\/title>.*/\1/p')
   album=$(echo "$title" | sed 's/[[:space:]]*$//')
 
   # Create directory for images
-  mkdir -p "$album"
+  mkdir -p "./Albums/$album"
 
   # Scrape images with aria2c
   curl -s "$url" \
-  | grep -Eo "https://[^/]+/wp-content/uploads/[0-9]{4}/[0-9]{2}/[^/]+\.(jpg|jpeg|webp|png|gif)" \
+  | grep -Eo "https?://[^/]+/wp-content/uploads/[0-9]{4}/[0-9]{2}/[^/]+\.(jpg|jpeg|webp|png|gif)" \
   | uniq \
-  | aria2c -i - -c -j 1 -d "$album" 
+  | aria2c -i - -c \
+  --check-certificate=false \
+  --max-download-limit=2M -j 1 \
+  -d "./Albums/$album" 
 done
