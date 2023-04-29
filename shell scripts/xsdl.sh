@@ -1,5 +1,5 @@
 #!/bin/bash
-# Album scraper for ilovexs.com
+# Album downloader for ilovexs.com
 
 usage() {
   echo "Usage: $0 [-a links.txt] <url>"
@@ -56,6 +56,6 @@ for url in "${urls[@]}"; do
   | uniq \
   | aria2c -i - -c \
   --check-certificate=false \
-  --max-download-limit=2M -j 1 \
+  --max-download-limit=1M -j 1 \
   -d "./Albums/$album" 
 done
