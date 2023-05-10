@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 """
-Script for scraping JAVLibrary information.
+Scrape JAVLibrary information using the javscraper module
+
 Usage:
-    ./scrape.py <code>
-    ./scrape.py list.txt
+    ./javlib.py <code>
+    ./javlib.py list.txt
 """
 
 import argparse
