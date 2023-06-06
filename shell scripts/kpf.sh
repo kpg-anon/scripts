@@ -7,14 +7,28 @@ USER_AGENT="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/2010010
 SECONDS=0
 LIMIT=100
 
+# Define color codes
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+PINK='\033[1;35m'
+PURPLE='\033[1;34m' # Bold purple
+NC='\033[0m' # No Color
+
 # Check for flags
 while getopts s:n:d: flag; do
     case "${flag}" in
         s) SUBREDDIT="${OPTARG}";;
         n) LIMIT="${OPTARG}";;
-        d) SEARCH_TERM="${OPTARG}"; DOWNLOAD_FLAG=true;;
+        d) DOWNLOAD_FLAG=true;;
     esac
 done
+
+# Shift the arguments past the options
+shift $((OPTIND-1))
+
+# If there are any arguments left, they will be the search term
+SEARCH_TERM="$*"
 SEARCH_URL=$(echo $SEARCH_TERM | sed 's/ /+/g')
 SEARCH_FILE=$(date +%y%m%d)" $SEARCH_TERM-$(date +$EPOCHSECONDS)"
 
@@ -22,7 +36,7 @@ SEARCH_FILE=$(date +%y%m%d)" $SEARCH_TERM-$(date +$EPOCHSECONDS)"
 print_box() {
     msg="# $1 #"
     edge=$(echo "$msg" | sed 's/./#/g')
-    echo -e "\n$edge\n$msg\n$edge\n"
+    echo -e "\n${PINK}$edge\n$msg\n$edge${NC}\n"
 }
 
 # Function to scrape page
@@ -51,13 +65,18 @@ while [[ $links_found -lt $LIMIT ]]; do
     page=$((page + 1))
     print_box "Page #${page}"
     links=$(scrape_page "$after")
-    media_links=$(echo "$links" | grep -P '^https?:\/\/(www\.)?(i\.imgur.com\/[A-Za-z0-9]+(\.[a-z]+)?|imgur.com\/[A-Za-z0-9]+(\.[a-z]+)?|gfycat.com\/[a-z]+|redgifs.com\/watch\/[a-z]+)$')
+    media_links=$(echo "$links" | grep -P '^https?:\/\/(www\.)?(imgur.com\/[A-Za-z0-9]+(\.[a-z]+)?|i.imgur.com\/[A-Za-z0-9]+(\.[a-z]+)?|gfycat.com\/[a-z]+|redgifs.com\/watch\/[a-z]+)$')
     if [[ -n "$media_links" ]]; then
-        echo -e "\e[92mFound media links:\e[0m \n$media_links"
+        links_count=$(echo "$media_links" | wc -l)
+        if [[ $((links_found + links_count)) -gt $LIMIT ]]; then
+            media_links=$(echo "$media_links" | head -n $((LIMIT - links_found)))
+        fi
+        links_count=$(echo "$media_links" | wc -l)
+        links_found=$((links_found + links_count))
+        echo -e "${GREEN}Found media links:${NC} \n$media_links"
         echo "$media_links" >> "tmp_$SEARCH_FILE.m3u"
-        links_found=$(wc -l < "tmp_$SEARCH_FILE.m3u")
     else
-        echo -e "\e[91mNo media links found.\e[0m"
+        echo -e "${RED}No media links found.${NC} \n"
     fi
     after=$(get_next "$after")
 
@@ -69,8 +88,8 @@ done
 
 # Check if any links were found
 if [[ ! -f "tmp_$SEARCH_FILE.m3u" ]]; then
-    echo -e "\e[34mLinks scraped:\e[0m 0"
-    printf "\e[92mElapsed:\e[0m %dm%ds\n" $((SECONDS/60)) $((SECONDS%60))
+    echo -e "${PURPLE}Links scraped:${NC} 0"
+    printf "${GREEN}Elapsed:${NC} %dm%ds\n" $((SECONDS/60)) $((SECONDS%60))
     exit 1
 fi
 
@@ -79,13 +98,13 @@ print_box "Outputting direct URLS to file"
 # Read each media link line by line
 # Use yt-dlp to get the direct url
 while IFS= read -r line; do
-    echo -e "\e[33mProcessing link:\e[0m $line"
+    echo -e "${YELLOW}Processing link:${NC} $line"
     video_url=$(yt-dlp -f mp4 -g --no-warnings "$line" 2>/dev/null)
     if [[ -n "$video_url" ]]; then
-        echo -e "\e[92mFound video URL:\e[0m $video_url"
+        echo -e "${GREEN}Found video URL:${NC} $video_url"
         echo "$video_url" >> "$SEARCH_FILE.m3u"
     else
-        echo -e "\e[91mNo video URL found for link:\e[0m $line"
+        echo -e "${RED}No video URL found for link:${NC} $line"
     fi
 done < "tmp_$SEARCH_FILE.m3u"
 
@@ -103,7 +122,7 @@ print_box "Finished"
 
 # Calculate total links
 total_links=$(wc -l < "${SEARCH_FILE}.m3u")
-echo -e "\e[34mLinks scraped:\e[0m $total_links"
+echo -e "${PURPLE}Links scraped:${NC} $total_links"
 
 # Calculate elapsed time
-printf "\e[92mElapsed:\e[0m %dm%ds\n" $((SECONDS/60)) $((SECONDS%60))
+printf "${GREEN}Elapsed:${NC} %dm%ds\n" $((SECONDS/60)) $((SECONDS%60))
