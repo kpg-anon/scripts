@@ -36,20 +36,30 @@ PINK='\033[1;35m'
 PURPLE='\033[1;34m'
 NC='\033[0m'
 
+# Initialize SEARCH_TERM as empty string
+SEARCH_TERM=""
+
 # Check for flags
 while getopts s:n:d:: flag; do
     case "${flag}" in
         s) SUBREDDIT="${OPTARG}";;
         n) LIMIT="${OPTARG}";;
-        d) DOWNLOAD_FLAG=true;;
+        d) DOWNLOAD_FLAG=true
+           if [[ ${OPTARG} ]]; then
+               SEARCH_TERM="${OPTARG}"
+           fi
+           ;;
     esac
 done
 
 # Shift the arguments past the options
 shift $((OPTIND-1))
 
-# If there are any arguments left, they will be the search term
-SEARCH_TERM="$*"
+# If there are any arguments left and SEARCH_TERM is still empty, they will be the search term
+if [[ -z ${SEARCH_TERM} ]]; then
+    SEARCH_TERM="$*"
+fi
+
 SEARCH_URL=$(echo $SEARCH_TERM | sed 's/ /+/g')
 SEARCH_FILE=$(date +%y%m%d)" $SEARCH_TERM-$(date +$EPOCHSECONDS)"
 
