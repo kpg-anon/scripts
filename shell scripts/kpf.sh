@@ -7,7 +7,7 @@
 #    • aria2c
 #
 # This script is used for scraping subreddits for imgur, gfycat and redgifs video links.
-# The scraped links are processed using yt-dlp to retrieve direct URLs which are then saved to a .m3u playlist file and optionally downloaded with aria2c.
+# The scraped links are processed using yt-dlp to retrieve direct media URLs which are then saved to a .m3u playlist file and optionally downloaded with aria2c.
 #
 # Usage:
 # ./kpf.sh -s <subreddit name> -n <number of links to scrape> -d <search term>
@@ -37,7 +37,7 @@ PURPLE='\033[1;34m'
 NC='\033[0m'
 
 # Check for flags
-while getopts s:n:d: flag; do
+while getopts s:n:d:: flag; do
     case "${flag}" in
         s) SUBREDDIT="${OPTARG}";;
         n) LIMIT="${OPTARG}";;
