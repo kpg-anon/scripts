@@ -96,7 +96,7 @@ while [[ $links_found -lt $LIMIT ]]; do
     page=$((page + 1))
     print_box "Page #${page}"
     links=$(scrape_page "$after")
-    media_links=$(echo "$links" | grep -P '^https?:\/\/(www\.)?(imgur.com\/[A-Za-z0-9]+(\.[a-z]+)?|i.imgur.com\/[A-Za-z0-9]+(\.[a-z]+)?|gfycat.com\/[a-z]+|redgifs.com\/watch\/[a-z]+)$')
+    media_links=$(echo "$links" | grep -P '^https?:\/\/(www\.)?(imgur.com\/[A-Za-z0-9]+(\.(?!jpg$|png$)[a-z]+)?|i.imgur.com\/[A-Za-z0-9]+(\.(?!jpg$|png$)[a-z]+)?|gfycat.com\/[a-z]+|redgifs.com\/watch\/[a-z]+)$')
     if [[ -n "$media_links" ]]; then
         links_count=$(echo "$media_links" | wc -l)
         if [[ $((links_found + links_count)) -gt $LIMIT ]]; then
