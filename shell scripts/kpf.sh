@@ -1,5 +1,26 @@
 #!/usr/bin/env bash
 
+# Requirements:
+#    • curl
+#    • jq
+#    • yt-dlp
+#    • aria2c
+#
+# This script is used for scraping subreddits for imgur, gfycat and redgifs video links.
+# The scraped links are processed using yt-dlp to retrieve direct URLs which are then saved to a .m3u playlist file and optionally downloaded with aria2c.
+#
+# Usage:
+# ./kpf.sh -s <subreddit name> -n <number of links to scrape> -d <search term>
+# All flag parameters are optional.
+# -s: The subreddit to scrape. Default is 'kpopfap'.
+# -n: The number of most recent submissions to scrape.
+# -d: Downloads the media files to a directory name matching the search term.
+# If no optional flags are provided, the script will scrape the 'kpopfap' subreddit for all submissions for a given search term and print the direct URLs to .m3u playlist file.
+# Examples:
+# ./kpf.sh "ive wonyoung"
+# ./kpf.sh -n 25 -d hikaru
+
+
 # Set the subreddit to be used
 SUBREDDIT="kpopfap"
 DOWNLOAD_FLAG=false
@@ -12,8 +33,8 @@ RED='\033[1;31m'
 GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 PINK='\033[1;35m'
-PURPLE='\033[1;34m' # Bold purple
-NC='\033[0m' # No Color
+PURPLE='\033[1;34m'
+NC='\033[0m'
 
 # Check for flags
 while getopts s:n:d: flag; do
