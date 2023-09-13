@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Script Description:
-# This script scrapes media links from selca.kastden.org based on a given hashtag.
+# This script scrapes media links from selca.kastden.org based on a given hashtag
 # It saves these links in a text file and then downloads them using aria2c.
 # 
 # Usage:
