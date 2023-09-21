@@ -4,7 +4,7 @@
 // @description  Cycles through video speed values by pressing 'S'
 // @author       kpganon
 // @version      1.0
-// @include    /^https?:\/\/boards\.4chan(nel)?\.org\/.*\/thread\/.*$/
+// @include      /^https?:\/\/boards\.4chan(nel)?\.org\/.*\/thread\/.*$/
 // @grant        none
 // ==/UserScript==
 

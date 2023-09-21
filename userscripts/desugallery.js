@@ -4,7 +4,7 @@
 // @description Gallery mode for desuarchive.org threads
 // @author      kpganon
 // @version     1.0
-// @include    /^https?:\/\/desuarchive\.org\/.*\/thread\/.*$/
+// @include     /^https?:\/\/desuarchive\.org\/.*\/thread\/.*$/
 // @grant       none
 // ==/UserScript==
 
