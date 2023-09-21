@@ -2,8 +2,10 @@
 // @name        Desuarchive Gallery
 // @namespace   https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/desugallery.js
 // @description Gallery mode for desuarchive.org threads
-// @include     https://desuarchive.org/*/thread/*
+// @author      kpganon
 // @version     1.0
+// @include    /^https?:\/\/desuarchive\.org\/.*\/thread\/.*$/
+// @grant       none
 // ==/UserScript==
 
 (function () {
