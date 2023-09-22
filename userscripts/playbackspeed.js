@@ -17,7 +17,7 @@
     // Create and style the playback rate indicator
     const indicator = document.createElement('div');
     indicator.style.position = 'fixed';
-    indicator.style.bottom = '10px';
+    indicator.style.bottom = '40px';
     indicator.style.right = '10px';
     indicator.style.zIndex = '10000';
     indicator.style.background = 'rgba(0, 0, 0, 0.7)';
