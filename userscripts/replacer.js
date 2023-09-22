@@ -4,7 +4,7 @@
 // @description Replaces strings in 4chan posts (compatible with 4chanX)
 // @author      kpganon
 // @include     /^https?://boards\.4chan(nel)?\.org/\w+/thread/\d+/
-// @version     1.0
+// @version     1.1
 // @updateURL   https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/replacer.js
 // @downloadURL https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/replacer.js
 // @grant       GM_getValue
@@ -205,19 +205,34 @@
     createMenu();
     createToggleButton();
 
-    function replaceTextInPost(post) {
+    function replaceTextInNode(node) {
+    // Skip if the node is part of a hyperlink
+    if (node.parentElement && node.parentElement.tagName === 'A') {
+        return;
+    }
         const savedRules = GM_getValue('wordReplacerRules');
         if (savedRules) {
             const rules = JSON.parse(savedRules);
-            let postContent = post.innerHTML;
             rules.forEach(rule => {
                 if (rule.pattern) {
                     const pattern = new RegExp(rule.pattern, 'gi');
-                    postContent = postContent.replace(pattern, rule.replacement);
+                    if (node.nodeType === 3) { // Only process text nodes
+                        node.nodeValue = node.nodeValue.replace(pattern, rule.replacement);
+                    }
                 }
             });
-            post.innerHTML = postContent;
         }
+    }
+
+    function replaceTextInPost(postElement) {
+        // Process main post content
+        Array.from(postElement.childNodes).forEach(replaceTextInNode);
+
+        // Process greentext content
+        let greentexts = postElement.querySelectorAll('.quote');
+        greentexts.forEach(quoteElement => {
+            Array.from(quoteElement.childNodes).forEach(replaceTextInNode);
+        });
     }
 
     function processMutations(mutations) {
@@ -228,8 +243,7 @@
                         let postNodes = node.querySelectorAll('.postMessage');
                         if (postNodes.length > 0) {
                             postNodes.forEach(replaceTextInPost);
-                        }
-                        else if (node.classList && node.classList.contains('postMessage')) {
+                        } else if (node.classList && node.classList.contains('postMessage')) {
                             replaceTextInPost(node);
                         }
                     }
