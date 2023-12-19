@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Desuarchive Infinite Scroll
 // @downloadURL  https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/desuinfinitescroll.user.js
-// @version      1.0
-// @description  Adds infinite scrolling with media preview on hover and download functionality to all search results pages on Desuarchive. Press 'S' while hovering over a thumbnail to download that file with the original filename.
+// @version      1.1
+// @description  Adds infinite scrolling with media preview on hover and download functionality to threads and search result pages on desuarchive.org. Press 'S' while hovering over a thumbnail to download that file with the original filename.
 // @author       kpganon
-// @match        https://desuarchive.org/*/search/*
+// @match        https://desuarchive.org/*/*
 // @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
@@ -13,7 +13,7 @@
     'use strict';
 
     GM_addStyle(`
-        .paginate, .backlink_container, #footer { display: none !important; }
+        .paginate, .backlink_container { display: none !important; }
         #hover-preview {
             display: none;
             position: fixed;
@@ -35,6 +35,10 @@
         }
     `);
 
+    if (window.location.pathname.includes('/search/')) {
+        GM_addStyle(`#footer { display: none !important; }`);
+    }
+
     const preview = document.createElement('div');
     preview.id = 'hover-preview';
     document.body.appendChild(preview);
@@ -43,7 +47,7 @@
     let hoveredMediaFilename = null;
 
     function attachHoverPreviewAndDownload() {
-        document.querySelectorAll('.post_wrapper .thread_image_link').forEach(anchor => {
+        document.querySelectorAll('.thread .thread_image_link, .post_wrapper .thread_image_link').forEach(anchor => {
             anchor.addEventListener('mouseover', function() {
                 const href = this.href;
                 const isVideo = href.endsWith('.webm') || href.endsWith('.mp4');
@@ -60,9 +64,13 @@
                 preview.appendChild(media);
                 preview.style.display = 'block';
 
-                const filenameLink = this.closest('.post_wrapper').querySelector('.post_file_filename');
+                const postContainer = this.closest('.post_wrapper') || this.closest('.thread');
+                const filenameElement = postContainer.querySelector('.post_file_filename');
+
                 hoveredMediaLink = href;
-                hoveredMediaFilename = filenameLink ? filenameLink.getAttribute('title') : getFilenameFromUrl(hoveredMediaLink);
+                hoveredMediaFilename = filenameElement ? (filenameElement.getAttribute('title') || filenameElement.textContent).trim() : getFilenameFromUrl(href);
+
+                console.log('Hovered media filename:', hoveredMediaFilename);
             });
 
             anchor.addEventListener('mouseout', function() {
@@ -104,48 +112,50 @@
         }
     });
 
-    var currentPageNumber = getCurrentPageNumber();
-    var loading = false;
+    attachHoverPreviewAndDownload();
 
-    function getCurrentPageNumber() {
-        var matches = window.location.pathname.match(/page\/(\d+)/);
-        return matches ? parseInt(matches[1], 10) : 1;
-    }
+    if (window.location.pathname.includes('/search/')) {
+        let currentPageNumber = getCurrentPageNumber();
+        let loading = false;
 
-    function constructNextPageUrl(currentPageNumber) {
-        var basePath = window.location.pathname.replace(/page\/\d+\/?$/, '');
-        return window.location.origin + basePath + 'page/' + (currentPageNumber + 1) + '/';
-    }
+        function getCurrentPageNumber() {
+            const matches = window.location.pathname.match(/page\/(\d+)/);
+            return matches ? parseInt(matches[1], 10) : 1;
+        }
 
-    function loadMoreContent() {
-        if(loading) return;
-        loading = true;
+        function constructNextPageUrl(currentPageNumber) {
+            const basePath = window.location.pathname.replace(/page\/\d+\/?$/, '');
+            return window.location.origin + basePath + 'page/' + (currentPageNumber + 1) + '/';
+        }
 
-        var nextPageUrl = constructNextPageUrl(currentPageNumber);
+        function loadMoreContent() {
+            if (loading) return;
+            loading = true;
 
-        $.ajax({
-            url: nextPageUrl,
-            type: 'GET',
-            success: function(response) {
-                var $response = $(response);
-                $response.find('article.backlink_container, section.section_title, h3.section_title, div.paginate, footer#footer').remove();
+            const nextPageUrl = constructNextPageUrl(currentPageNumber);
 
-                var newContent = $response.find('.thread').parent();
-                $('.thread').last().parent().append(newContent.html());
+            $.ajax({
+                url: nextPageUrl,
+                type: 'GET',
+                success: function(response) {
+                    const $response = $(response);
+                    $response.find('article.backlink_container, section.section_title, h3.section_title, div.paginate').remove();
 
-                attachHoverPreviewAndDownload();
+                    const newContent = $response.find('.thread').parent();
+                    $('.thread').last().parent().append(newContent.html());
 
-                currentPageNumber++;
-                loading = false;
+                    attachHoverPreviewAndDownload();
+
+                    currentPageNumber++;
+                    loading = false;
+                }
+            });
+        }
+
+        $(window).scroll(function() {
+            if ($(window).scrollTop() + $(window).height() > $(document).height() - 100 && !loading) {
+                loadMoreContent();
             }
         });
     }
-
-    $(window).scroll(function() {
-        if ($(window).scrollTop() + $(window).height() > $(document).height() - 100 && !loading) {
-            loadMoreContent();
-        }
-    });
-
-    attachHoverPreviewAndDownload();
 })();
