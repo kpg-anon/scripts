@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Remove YouTube Share Tracking Parameter
+// @name         Remove YouTube Share Tracking Parameters
 // @namespace    https://github.com/kpg-anon/scripts/blob/main/userscripts/yt-remove-tracking.js
-// @version      1.0
-// @description  Removes ?si= tracking parameter from YouTube share URLs
+// @version      1.1
+// @description  Removes tracking parameters from all YouTube links
 // @author       kpganon
 // @match        *://www.youtube.com/*
 // @grant        none
@@ -11,24 +11,49 @@
 (function() {
     'use strict';
 
-    function removeTrackingFromLinks() {
-        // Get all input elements
-        const inputs = document.querySelectorAll('input');
-        
-        // Iterate through each input element
-        for (const input of inputs) {
-            let value = input.value;
-            // Check if the value matches a YouTube share URL with tracking parameter
-            if (/https:\/\/youtu\.be\/[a-zA-Z0-9_-]+\?si=/.test(value)) {
-                // Remove the tracking parameter
-                input.value = value.split('?si=')[0];
+    function removeTrackingParameters(input) {
+        if (input && input.value) {
+            let newValue = input.value.replace(/(\&|\?)si=[^&]+/, '').replace(/(\&|\?)pp=[^&]+/, '');
+            newValue = newValue.replace(/^([^?]+)&/, '$1?');
+            if (input.value !== newValue) {
+                input.value = newValue;
             }
         }
     }
 
-    // Initial call
-    removeTrackingFromLinks();
+    function handleInputChange() {
+        const shareInput = document.querySelector('yt-share-target-renderer input');
+        removeTrackingParameters(shareInput);
+    }
 
-    // To handle YouTube's dynamic content loading
-    new MutationObserver(removeTrackingFromLinks).observe(document, {subtree: true, childList: true});
+    const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+            if (mutation.addedNodes.length) {
+                for (const node of mutation.addedNodes) {
+                    if (node.nodeType === Node.ELEMENT_NODE && node.querySelector('yt-share-target-renderer')) {
+                        const intervalId = setInterval(handleInputChange, 50);
+
+                        const closeButton = node.querySelector('[aria-label="Close"]');
+                        if (closeButton) {
+                            closeButton.addEventListener('click', () => {
+                                clearInterval(intervalId);
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    setInterval(() => {
+        document.querySelectorAll('input, a').forEach(element => {
+            if (element.tagName.toLowerCase() === 'input') {
+                removeTrackingParameters(element);
+            } else if (element.tagName.toLowerCase() === 'a' && /\/watch\?v=/.test(element.href)) {
+                element.href = element.href.replace(/(\&|\?)si=[^&]+/, '').replace(/(\&|\?)pp=[^&]+/, '');
+            }
+        });
+    }, 50);
 })();
