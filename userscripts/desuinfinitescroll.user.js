@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         Desuarchive Infinite Scroll
-// @downloadURL  https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/desuinfinitescroll.user.js
 // @version      1.1
 // @description  Adds infinite scrolling with media preview on hover and download functionality to threads and search result pages on desuarchive.org. Press 'S' while hovering over a thumbnail to download that file with the original filename.
 // @author       kpganon
+// @namespace    https://github.com/kpg-anon/scripts
+// @downloadURL  https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/desuinfinitescroll.user.js
+// @updateURL    https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/desuinfinitescroll.user.js
 // @match        https://desuarchive.org/*/*
 // @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest

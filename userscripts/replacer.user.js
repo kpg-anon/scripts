@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name        4chanX String Replacement
-// @namespace   https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/replacer.js
+// @version     1.1
 // @description Replaces strings in 4chan posts (compatible with 4chanX)
 // @author      kpganon
+// @namespace   https://github.com/kpg-anon/scripts
+// @downloadURL https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/replacer.user.js
+// @updateURL   https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/replacer.user.js
 // @include     /^https?://boards\.4chan(nel)?\.org/\w+/thread/\d+/
-// @version     1.1
-// @updateURL   https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/replacer.js
-// @downloadURL https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/replacer.js
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_download

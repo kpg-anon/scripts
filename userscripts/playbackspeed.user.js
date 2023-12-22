@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         Cycle Playback Speed on Hovered Video
-// @namespace    https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/playbackspeed.js
+// @version      1.0
 // @description  Cycles through video speed values by pressing 'S'
 // @author       kpganon
-// @version      1.0
+// @namespace    https://github.com/kpg-anon/scripts
+// @downloadURL  https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/playbackspeed.user.js
+// @updateURL    https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/playbackspeed.user.js
 // @include      /^https?:\/\/boards\.4chan(nel)?\.org\/.*\/thread\/.*$/
 // @grant        none
 // ==/UserScript==

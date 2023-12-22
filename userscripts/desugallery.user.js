@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name        Desuarchive Gallery
-// @namespace   https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/desugallery.js
+// @version     1.0
 // @description Gallery mode for desuarchive.org threads
 // @author      kpganon
-// @version     1.0
+// @namespace   https://github.com/kpg-anon/scripts
+// @downloadURL https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/desugallery.user.js
+// @updateURL   https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/desugallery.user.js
 // @include     /^https?:\/\/desuarchive\.org\/.*\/thread\/.*$/
 // @grant       none
 // ==/UserScript==

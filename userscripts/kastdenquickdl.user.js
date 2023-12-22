@@ -3,6 +3,9 @@
 // @version      1.0
 // @description  Download images by pressing 'S' when hovering over a thumbnail
 // @author       kpganon
+// @namespace    https://github.com/kpg-anon/scripts
+// @downloadURL  https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/kastdenquickdl.user.js
+// @updateURL    https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/kastdenquickdl.user.js
 // @match        https://selca.kastden.org/*
 // @grant        none
 // ==/UserScript==

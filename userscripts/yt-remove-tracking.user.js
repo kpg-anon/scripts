@@ -1,9 +1,11 @@
 // ==UserScript==
-// @name         Remove YouTube Share Tracking Parameters
-// @namespace    https://github.com/kpg-anon/scripts/blob/main/userscripts/yt-remove-tracking.js
+// @name         Remove YouTube Tracking Parameters
 // @version      1.1
 // @description  Removes tracking parameters from all YouTube links
 // @author       kpganon
+// @namespace    https://github.com/kpg-anon/scripts
+// @downloadURL  https://github.com/kpg-anon/scripts/blob/main/userscripts/yt-remove-tracking.user.js
+// @updateURL    https://github.com/kpg-anon/scripts/blob/main/userscripts/yt-remove-tracking.user.js
 // @match        *://www.youtube.com/*
 // @grant        none
 // ==/UserScript==
