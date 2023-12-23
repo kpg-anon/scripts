@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Reddit Imgur GIFV to MP4
 // @version      1.0
-// @downloadURL  https://github.com/kpg-anon/scripts/blob/main/userscripts/reddit-gifv2mp4.user.js
+// @downloadURL  https://github.com/kpg-anon/scripts/raw/main/userscripts/reddit-gifv2mp4.user.js
 // @description  Change imgur .gifv links to .mp4
 // @author       kpganon
 // @match        *://*.reddit.com/*

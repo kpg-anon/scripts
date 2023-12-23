@@ -4,8 +4,8 @@
 // @description  Removes tracking parameters from all YouTube links
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
-// @downloadURL  https://github.com/kpg-anon/scripts/blob/main/userscripts/yt-remove-tracking.user.js
-// @updateURL    https://github.com/kpg-anon/scripts/blob/main/userscripts/yt-remove-tracking.user.js
+// @downloadURL  https://github.com/kpg-anon/scripts/raw/main/userscripts/yt-remove-tracking.user.js
+// @updateURL    https://github.com/kpg-anon/scripts/raw/main/userscripts/yt-remove-tracking.user.js
 // @match        *://www.youtube.com/*
 // @grant        none
 // ==/UserScript==
