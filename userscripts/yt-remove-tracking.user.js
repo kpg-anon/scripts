@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Remove YouTube Tracking Parameters
-// @version      1.1
-// @description  Removes tracking parameters from all YouTube links
+// @name         Remove YouTube Tracking Parameters and Convert Shorts Links
+// @version      1.2
+// @description  Removes tracking parameters from all YouTube links and converts /shorts/ links to normal (shortened) video links within the share box
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
 // @downloadURL  https://github.com/kpg-anon/scripts/raw/main/userscripts/yt-remove-tracking.user.js
@@ -17,6 +17,9 @@
         if (input && input.value) {
             let newValue = input.value.replace(/(\&|\?)si=[^&]+/, '').replace(/(\&|\?)pp=[^&]+/, '');
             newValue = newValue.replace(/^([^?]+)&/, '$1?');
+
+            newValue = newValue.replace(/youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/, 'youtu.be/$1');
+
             if (input.value !== newValue) {
                 input.value = newValue;
             }
