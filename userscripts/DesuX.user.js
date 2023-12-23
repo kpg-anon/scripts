@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         DesuX
-// @version      2.0
+// @version      2.1
 // @description  Combines infinite scrolling, media preview on hover, download functionality, and gallery mode for desuarchive.org. Alt+G to activate gallery mode. Press 'S' while hovering over a thumbnail or in gallery mode to download media with the original filename.
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
@@ -422,7 +422,22 @@
             filenameLink = postWrapperParent ? postWrapperParent.querySelector('.post_file_filename') : null;
         }
 
-        return filenameLink && filenameLink.textContent ? filenameLink.textContent.trim() : "file.jpg";
+        if (filenameLink) {
+            if (filenameLink.getAttribute('title')) {
+                return filenameLink.getAttribute('title').trim();
+            } else if (filenameLink.textContent) {
+                return filenameLink.textContent.trim();
+            }
+        }
+
+        const currentMedia = images.find(img => img.postId === postId);
+        if (currentMedia && currentMedia.src) {
+            const urlParts = currentMedia.src.split('.');
+            const ext = urlParts[urlParts.length - 1];
+            return `default-filename.${ext}`;
+        }
+
+        return "default-filename";
     }
 
     function downloadCurrentMedia() {
