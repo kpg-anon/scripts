@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         DesuX - Enhancement Script for Desuarchive.org
+// @name         Desu X - Enhancement Script for Desuarchive.org
 // @version      2.1
 // @description  Combines infinite scrolling, media preview on hover, download functionality, and gallery mode for desuarchive.org. Alt+G to activate gallery mode. Press 'S' while hovering over a thumbnail or in gallery mode to download media with the original filename.
 // @author       kpganon
