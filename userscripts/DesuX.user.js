@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Desu X - Enhancement Script for Desuarchive.org
 // @version      2.2
-// @description  Combines infinite scrolling, media preview on hover, download functionality, and gallery mode for desuarchive.org. Alt+G to activate gallery mode. Press 'S' while hovering over a thumbnail or in gallery mode to download media with the original filename.
+// @description  Combines infinite scrolling, media preview on hover, download functionality and gallery mode for desuarchive.org. Alt+G to activate gallery mode. Press 'S' while hovering over a thumbnail or in gallery mode to download media with the original filename.
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
 // @downloadURL  https://github.com/kpg-anon/scripts/raw/main/userscripts/DesuX.user.js
@@ -43,159 +43,159 @@
             object-fit: contain;
         }
         #ig-galleryContainer {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.8);
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding-bottom: 80px;
-    }
-    #ig-galleryImage {
-        max-width: 90%;
-        max-height: calc(100% - 80px - 20px);
-        transition: all 0.3s ease;
-    }
-    #ig-imageCounter {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        color: white;
-        font-size: 20px;
-        background-color: rgba(0, 0, 0, 0.6);
-        padding: 5px 10px;
-        border-radius: 5px;
-        z-index: 100000;
-    }
-    .ig-close-button {
-        position: fixed;
-        top: 0;
-        right: 0;
-        padding: 0;
-        background-color: transparent;
-        border: none;
-    }
-    .ig-close-button:hover {
-        background-color: rgba(0, 0, 0, 0.7);
-        filter: brightness(85%);
-    }
-    .ig-nav-button {
-        position: fixed;
-        background-color: transparent;
-        border: none;
-        padding: 0;
-        width: auto;
-        height: auto;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10001;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-    .ig-nav-button:hover {
-        background-color: rgba(0, 0, 0, 0.7);
-        filter: brightness(85%);
-    }
-    .ig-nav-button:active {
-        background-color: transparent;
-    }
-    .ig-nav-button.ig-prev-button {
-        left: -5px;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-    .ig-nav-button.ig-prev-button:active .button-icon {
-        transform: scale(0.95);
-    }
-    .ig-nav-button.ig-next-button {
-        right: -5px;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-    .ig-nav-button.ig-next-button:active .button-icon {
-        transform: scale(0.95);
-    }
-    #ig-thumbnailBar {
-        position: fixed;
-        bottom: 0;
-        left: 50%;
-        right: 0;
-        height: 75px;
-        transform: translateX(-50%);
-        display: flex;
-        overflow-x: scroll;
-        overflow-y: hidden;
-        background-color: rgba(0, 0, 0, 0.6);
-        padding: 10px 0;
-        white-space: nowrap;
-        scrollbar-width: thin;
-        scrollbar-color: #444 #282A36;
-    }
-    #ig-thumbnailBar::-webkit-scrollbar {
-        height: 12px;
-        background: #282A36;
-    }
-    #ig-thumbnailBar::-webkit-scrollbar-track {
-        background: #282A36;
-    }
-    #ig-thumbnailBar::-webkit-scrollbar-thumb {
-        background-color: #444;
-        border-radius: 10px;
-        border: 3px solid #282A36;
-    }
-    #ig-thumbnailBar::-webkit-scrollbar-thumb:hover {
-        background: #555;
-    }
-    .ig-thumbnail {
-        height: 60px;
-        object-fit: cover;
-        margin: 0 5px;
-        cursor: pointer;
-        transition: transform 0.3s ease, outline 0.3s ease;
-    }
-    .ig-thumbnail:hover {
-        opacity: 0.7;
-    }
-    .ig-thumbnail.ig-active {
-        transform: scale(1.05);
-        outline: 3px solid green;
-    }
-    .ig-download-button {
-        position: fixed;
-        top: 5px;
-        width: 40px;
-        height: 40px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        padding: 0;
-        background-color: transparent;
-        transition: background-color 0.3s ease, transform 0.3s ease;
-        z-index: 10002;
-    }
-    .ig-download-button .button-icon {
-        width: 100%;
-        height: 100%;
-        transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    .ig-download-button:hover {
-        background-color: transparent;
-        box-shadow: none;
-    }
-    .ig-download-button:hover .button-icon {
-        transform: scale(1.05);
-        opacity: 0.7;
-    }
-    .ig-download-button:active .button-icon {
-        transform: scale(0.95);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 80px;
+        }
+        #ig-galleryImage {
+            max-width: 90%;
+            max-height: calc(100% - 80px - 20px);
+            transition: all 0.3s ease;
+        }
+        #ig-imageCounter {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 100000;
+        }
+        .ig-close-button {
+            position: fixed;
+            top: 0;
+            right: 0;
+            padding: 0;
+            background-color: transparent;
+            border: none;
+        }
+        .ig-close-button:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+            filter: brightness(85%);
+        }
+        .ig-nav-button {
+            position: fixed;
+            background-color: transparent;
+            border: none;
+            padding: 0;
+            width: auto;
+            height: auto;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .ig-nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+            filter: brightness(85%);
+        }
+        .ig-nav-button:active {
+            background-color: transparent;
+        }
+        .ig-nav-button.ig-prev-button {
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .ig-nav-button.ig-prev-button:active .button-icon {
+            transform: scale(0.95);
+        }
+        .ig-nav-button.ig-next-button {
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .ig-nav-button.ig-next-button:active .button-icon {
+            transform: scale(0.95);
+        }
+        #ig-thumbnailBar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            right: 0;
+            height: 75px;
+            transform: translateX(-50%);
+            display: flex;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 10px 0;
+            white-space: nowrap;
+            scrollbar-width: thin;
+            scrollbar-color: #444 #282A36;
+        }
+        #ig-thumbnailBar::-webkit-scrollbar {
+            height: 12px;
+            background: #282A36;
+        }
+        #ig-thumbnailBar::-webkit-scrollbar-track {
+            background: #282A36;
+        }
+        #ig-thumbnailBar::-webkit-scrollbar-thumb {
+            background-color: #444;
+            border-radius: 10px;
+            border: 3px solid #282A36;
+        }
+        #ig-thumbnailBar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .ig-thumbnail {
+            height: 60px;
+            object-fit: cover;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease, outline 0.3s ease;
+        }
+        .ig-thumbnail:hover {
+            opacity: 0.7;
+        }
+        .ig-thumbnail.ig-active {
+            transform: scale(1.05);
+            outline: 3px solid green;
+        }
+        .ig-download-button {
+            position: fixed;
+            top: 5px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            padding: 0;
+            background-color: transparent;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            z-index: 10002;
+        }
+        .ig-download-button .button-icon {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .ig-download-button:hover {
+            background-color: transparent;
+            box-shadow: none;
+        }
+        .ig-download-button:hover .button-icon {
+            transform: scale(1.05);
+            opacity: 0.7;
+        }
+        .ig-download-button:active .button-icon {
+            transform: scale(0.95);
     `);
 
     const prefix = 'ig-';
@@ -214,7 +214,7 @@
         document.querySelectorAll('.thread .thread_image_link, .post_wrapper .thread_image_link').forEach(anchor => {
             anchor.addEventListener('mouseover', function() {
                 const href = this.href;
-                const isVideo = href.endsWith('.webm') || href.endsWith('.mp4');
+                const isVideo = href.endsWith('.webm')
 
                 preview.innerHTML = '';
                 const media = isVideo ? document.createElement('video') : document.createElement('img');
