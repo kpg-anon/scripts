@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Desu X - Enhancement Script for Desuarchive.org
-// @version      2.1
+// @version      2.2
 // @description  Combines infinite scrolling, media preview on hover, download functionality, and gallery mode for desuarchive.org. Alt+G to activate gallery mode. Press 'S' while hovering over a thumbnail or in gallery mode to download media with the original filename.
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
@@ -197,9 +197,6 @@
     .ig-download-button:active .button-icon {
         transform: scale(0.95);
     `);
-    if (window.location.pathname.includes('/search/')) {
-        GM_addStyle(`#footer { display: none !important; }`);
-    }
 
     const prefix = 'ig-';
     let hoveredMediaLink = null;
@@ -249,22 +246,31 @@
         return url.split('/').pop();
     }
 
+    let currentPageNumber = getCurrentPageNumber();
+
+    if (window.location.pathname.includes('/search/')) {
+        $('#footer').hide();
+    }
+
     function loadMoreContent() {
         if (loading || !window.location.pathname.includes('/search/')) return;
         loading = true;
 
-        let currentPageNumber = getCurrentPageNumber();
-        const nextPageUrl = constructNextPageUrl(currentPageNumber);
+        const nextPageUrl = constructNextPageUrl();
 
         $.ajax({
             url: nextPageUrl,
             type: 'GET',
             success: function(response) {
                 const $response = $(response);
-
                 $response.find('article.backlink_container, section.section_title, h3.section_title, div.paginate').remove();
-
                 const newContent = $response.find('.thread').parent();
+
+                if (newContent.length === 0) {
+                    $('#footer').show();
+                    loading = false;
+                    return;
+                }
 
                 $('.thread').last().parent().append(newContent.html());
 
