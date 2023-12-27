@@ -1,5 +1,6 @@
 // ==UserScript==
-// @name         Kastden+ - Enhancement Script for selca.kastden.org-FINAL
+// @name         Kastden+ - Enhancement Script for selca.kastden.org
+// @version      1.1
 // @description  Adds dark mode, download keybind and various UI improvements to kastden. Press 'S' while hovering over a thumbnail or in gallery mode to download
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
@@ -15,21 +16,21 @@
     'use strict';
 
     var colorCodes = {
-        'background-color': '#282A36',
-        'text-color': 'lightgrey',
-        'link-color': '#FF79C6',
-        'link-hover': '#cc609e',
-        'group-link': '#ffaedc',
-        'member-list': 'grey',
-        'button-background': '#44475A',
-        'button-hover': '#6272A4',
-        'button-text': 'silver',
-        'input-text': 'white',
-        'form-background': '#3d3f4a',
-        'username-color': 'orange',
-        'backtotop-button': '#363848',
-        'text-highlight': 'rgba(255, 161, 215, 0.45)',
-        'thumbnail-border': 'hotpink'
+        'background-color':     '#282A36',
+        'text-color':           'lightgrey',
+        'link-color':           '#FF79C6',
+        'link-hover':           '#cc609e',
+        'group-link':           '#ffaedc',
+        'member-list':          'grey',
+        'button-background':    '#44475A',
+        'button-hover':         '#6272A4',
+        'button-text':          'silver',
+        'input-text':           'white',
+        'form-background':      '#3d3f4a',
+        'username-color':       'orange',
+        'backtotop-button':     '#363848',
+        'text-highlight':       'rgba(255, 161, 215, 0.45)',
+        'thumbnail-border':     'hotpink'
     };
 
     function createCSSVariables(colorCodes) {
@@ -76,12 +77,58 @@
         }
     }
 
+    function downloadImage(url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = url.split('/').pop();
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    let hoveredElement = null;
+      document.addEventListener('mouseover', function(e) {
+        const closestAnchor = e.target.closest('.image a');
+        if (closestAnchor) {
+            hoveredElement = closestAnchor;
+        } else {
+            hoveredElement = null;
+        }
+    });
+
+    function isGalleryActive() {
+        const currentURL = window.location.href;
+        const isActive = currentURL.includes('/media/');
+        return isActive;
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 's' || e.key === 'S') {
+            e.preventDefault();
+            let imageUrl = '';
+
+            if (isGalleryActive()) {
+                const galleryImage = document.querySelector('#cover_media_frame img');
+                if (galleryImage && galleryImage.src) {
+                    imageUrl = galleryImage.src;
+                }
+            } else if (hoveredElement && hoveredElement.href) {
+                imageUrl = hoveredElement.href;
+            }
+
+            if (imageUrl) {
+                downloadImage(imageUrl);
+            } else {
+            }
+        }
+    });
+
     var styleRules = `
         * {
             color: var(--text-color);
         }
         html {
-          scroll-behavior: smooth;
+            scroll-behavior: smooth;
         }
         body {
             background-color: var(--background-color)
@@ -194,11 +241,7 @@
             color: var(--member-list);
         }
         .member.unfollowed, .member.unfollowed a {
-           color: var(--member-list);
-        }
-        #page>div {
-          /* border-left: 1px solid rgba(255, 105, 180, 0.33);
-          border-right: 1px solid rgba(255, 105, 180, 0.33); */
+            color: var(--member-list);
         }
         ::-webkit-scrollbar {
             width: 12px;
@@ -228,7 +271,7 @@
             text-shadow: 0 0 10px var(--username-color);
         }
         .media_frame {
-          height: auto !important;
+            height: auto !important;
         }
         #cover_media_frame {
             overflow: hidden;
@@ -259,7 +302,6 @@
             position: relative;
             overflow: hidden;
         }
-
         .entry:hover::after {
             content: '';
             position: absolute;
@@ -293,7 +335,7 @@
             transition: opacity 0.3s ease, background-color 0.3s ease;
             font-size: 36px;
             opacity: 0;
-          pointer-events: none;
+            pointer-events: none;
         }
 
         #back-to-top-btn:hover {
@@ -335,37 +377,6 @@
     });
 
     observer.observe(document.documentElement, { childList: true, subtree: true });
-
-    const downloadImage = (url) => {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = url.split('/').pop();
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    };
-
-    document.addEventListener('mouseover', function(e) {
-        if (e.target.closest('.image a')) {
-            hoveredElement = e.target.closest('.image a');
-        }
-    });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 's' || e.key === 'S') {
-            if (hoveredElement && hoveredElement.href) {
-                e.preventDefault();
-                downloadImage(hoveredElement.href);
-            }
-            else if (document.getElementById('cover_media_frame')) {
-                const galleryImageLink = document.querySelector('#cover_media_frame a');
-                if (galleryImageLink && galleryImageLink.href) {
-                    e.preventDefault();
-                    downloadImage(galleryImageLink.href);
-                }
-            }
-        }
-    });
 
     function usernameGlow(parentElement) {
         if (!parentElement) return;
