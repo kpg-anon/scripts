@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Kastden+ - Enhancement Script for selca.kastden.org
-// @version      1.1
+// @version      1.2
 // @description  Adds dark mode, download keybind and various UI improvements to kastden. Press 'S' while hovering over a thumbnail or in gallery mode to download
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
@@ -160,6 +160,7 @@
         }
         .header, .post_info, .entry, .image {
             background-color: var(--background-color)
+            border: 1px solid #4B0082;
         }
         .post_info.media_info {
             border-radius: 10px;
@@ -300,6 +301,12 @@
         }
         .entry {
             position: relative;
+            clip-path: inset(0);
+            margin: 2px;
+        }
+        .entry .thumb.error_handled.loaded.done {
+            transition: transform 0.3s ease, filter 0.3s ease;
+            transform-origin: center;
         }
         .entry:hover::after {
             content: '';
