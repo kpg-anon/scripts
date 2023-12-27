@@ -300,7 +300,6 @@
         }
         .entry {
             position: relative;
-            overflow: hidden;
         }
         .entry:hover::after {
             content: '';
