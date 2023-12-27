@@ -4,8 +4,8 @@
 // @description  Cycles through video speed values by pressing 'S' on hovered videos with 4chanX
 // @author       kpg-anon
 // @namespace    https://github.com/kpg-anon/scripts
-// @downloadURL  https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/playbackspeed.js
-// @updateURL    https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/playbackspeed.js
+// @downloadURL  https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/playbackspeed.user.js
+// @updateURL    https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/playbackspeed.user.js
 // @include      /^https?:\/\/boards\.4chan(nel)?\.org\/.*\/thread\/.*$/
 // @grant        none
 // ==/UserScript==
