@@ -1,97 +1,185 @@
 // ==UserScript==
 // @name        4chanX String Replacement
-// @version     1.1
-// @description Replaces strings in 4chan posts (compatible with 4chanX)
+// @version     2.0
+// @description Replaces text in 4chan posts. Supports literal strings and simplified regex with automatic case-insensitivity. Fully compatible with 4chanX and Oneechan themes.
 // @author      kpganon
 // @namespace   https://github.com/kpg-anon/scripts
 // @downloadURL https://github.com/kpg-anon/scripts/raw/main/userscripts/replacer.user.js
 // @updateURL   https://github.com/kpg-anon/scripts/raw/main/userscripts/replacer.user.js
 // @include     /^https?://boards\.4chan(nel)?\.org/\w+/thread/\d+/
+// @grant       GM_addStyle
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_download
 // @grant       GM_xmlhttpRequest
-// @run-at      document-end
+// @run-at      document-idle
 // ==/UserScript==
 
 (function() {
+
+    function applyStaticStyles() {
+        GM_addStyle(`
+            #wordReplacerMenu {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 9999;
+                background-color: #282a36;
+                color: #f8f8f2;
+                border: 1px solid #6272a4;
+                padding: 10px;
+                width: auto;
+                max-height: 800px;
+                overflow-y: auto;
+                display: none;
+            }
+            #wordReplacerMenu #rulesContainer {
+                margin-top: 10px;
+            }
+            #wordReplacerMenu #rulesContainer div {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 5px;
+            }
+            #wordReplacerMenu input {
+                flex: 1;
+                margin-right: 10px;
+                max-width: 45%;
+                text-align: center;
+                position: relative;
+                border: 1px solid #6272a4;
+                color: #c5c8c6;
+            }
+            #wordReplacerMenu #buttonContainer {
+                text-align: center;
+                width: 100%;
+                margin-top: 12px;
+            }
+            #wordReplacerMenu button {
+                margin: 0 2px;
+                display: inline-block;
+                cursor: pointer;
+                border-radius: 2px;
+            }
+        `);
+    }
+
+    function applyDynamicStyles() {
+        const nameElementColor = window.getComputedStyle(document.querySelector('.name')).color;
+        const rgbaBorderColor = nameElementColor.replace('rgb', 'rgba').replace(')', ', 0.75)');
+        GM_addStyle(`#wordReplacerMenu { border: 1px solid ${nameElementColor}; }`);
+
+        const replyElement = document.querySelector('.reply');
+        if (replyElement) {
+            const computedReplyBgColor = window.getComputedStyle(replyElement).backgroundColor;
+            const replyRgbaColor = computedReplyBgColor.replace('rgb', 'rgba').replace(')', ', 0.9)');
+            GM_addStyle(`#wordReplacerMenu { background-color: ${replyRgbaColor} !important; }`);
+        }
+
+        const textareaElement = document.querySelector('textarea');
+        if (textareaElement) {
+            const computedTextareaBgColor = window.getComputedStyle(textareaElement).backgroundColor;
+            const textareaRgbMatch = computedTextareaBgColor.match(/\d+, \d+, \d+/);
+            if (textareaRgbMatch) {
+                const textareaRgbaColor = `rgba(${textareaRgbMatch[0]}, 0.9)`;
+                GM_addStyle(`#wordReplacerMenu input { background-color: ${textareaRgbaColor}; }`);
+            }
+        }
+
+        const submitButton = document.querySelector('input[type="submit"]');
+        const bodyColor = window.getComputedStyle(document.body).color;
+        let buttonTextColor;
+
+        if (bodyColor === 'rgb(197, 200, 198)') {
+            buttonTextColor = 'black';
+        } else {
+            buttonTextColor = bodyColor;
+        }
+
+        if (submitButton) {
+            const buttonBgColor = window.getComputedStyle(submitButton).backgroundColor;
+            GM_addStyle(`
+                #wordReplacerMenu button {
+                    background-color: ${buttonBgColor};
+                    color: ${buttonTextColor};
+                    border-radius: 2px;
+                    border: 1px solid ${rgbaBorderColor};
+                }
+            `);
+        }
+    }
+
+    function observeStyleChanges() {
+        const styleElement = document.getElementById('ch4SS'); 
+        if (!styleElement) {
+            return;
+        }
+
+        const observerOptions = {
+            childList: true,
+            subtree: true
+        };
+
+        const styleChangeObserver = new MutationObserver((mutations) => {
+            for (let mutation of mutations) {
+                if (mutation.type === 'childList') {
+                    applyDynamicStyles();
+                }
+            }
+        });
+
+        styleChangeObserver.observe(styleElement, observerOptions);
+    }
+
     function createMenu() {
         const menu = document.createElement('div');
         menu.id = 'wordReplacerMenu';
-        menu.style.position = 'fixed';
-        menu.style.top = '50%';
-        menu.style.left = '50%';
-        menu.style.transform = 'translate(-50%, -50%)';
-        menu.style.zIndex = '9999';
-        menu.style.backgroundColor = '#282a36';
-        menu.style.color = '#f8f8f2';
-        menu.style.border = '1px solid #6272a4';
-        menu.style.padding = '10px';
-        menu.style.width = 'auto';
-        menu.style.maxHeight = '800px';
-        menu.style.overflowY = 'auto';
-        menu.style.display = 'none';
 
         const rulesContainer = document.createElement('div');
         rulesContainer.id = 'rulesContainer';
         menu.appendChild(rulesContainer);
 
         const buttonContainer = document.createElement('div');
-        buttonContainer.style.marginTop = '10px';
+        buttonContainer.id = 'buttonContainer';
         menu.appendChild(buttonContainer);
 
         document.body.appendChild(menu);
 
-        const addButton = document.createElement('button');
-        addButton.textContent = 'Add Rule';
-        addButton.addEventListener('click', () => addRuleRow());
-        buttonContainer.appendChild(addButton);
+        addRuleRow();
+        addButtons(buttonContainer);
+        applyDynamicStyles();
+    }
 
-        const saveButton = document.createElement('button');
-        saveButton.textContent = 'Save and Apply';
-        saveButton.addEventListener('click', saveRules);
-        buttonContainer.appendChild(saveButton);
+    function addButtons(container) {
+        const buttons = ['Add Rule', 'Save and Apply', 'Import', 'Export', 'Close'];
+        const functions = [() => addRuleRow(), saveRules, importRules, exportRules, toggleMenu];
 
-        const importButton = document.createElement('button');
-        importButton.textContent = 'Import';
-        importButton.addEventListener('click', importRules);
-        buttonContainer.appendChild(importButton);
-
-        const exportButton = document.createElement('button');
-        exportButton.textContent = 'Export';
-        exportButton.addEventListener('click', exportRules);
-        buttonContainer.appendChild(exportButton);
-
-        const closeButton = document.createElement('button');
-        closeButton.textContent = 'Close';
-        closeButton.addEventListener('click', toggleMenu);
-        buttonContainer.appendChild(closeButton);
+        buttons.forEach((text, index) => {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.addEventListener('click', functions[index]);
+            container.appendChild(button);
+        });
     }
 
     function addRuleRow(pattern = '', replacement = '') {
         const inputContainer = document.createElement('div');
-        inputContainer.style.display = 'flex';
-        inputContainer.style.justifyContent = 'space-between';
-        inputContainer.style.marginTop = '5px';
-
-        const patternInput = document.createElement('input');
-        patternInput.placeholder = 'Text/pattern to replace';
-        patternInput.style.flex = '1';
-        patternInput.style.marginRight = '10px';
-        patternInput.style.maxWidth = '45%';
-        patternInput.value = pattern;
-
-        const replacementInput = document.createElement('input');
-        replacementInput.placeholder = 'Replacement text';
-        replacementInput.style.flex = '1';
-        replacementInput.style.maxWidth = '45%';
-        replacementInput.value = replacement;
+        const patternInput = createInput('Text/pattern to replace', pattern);
+        const replacementInput = createInput('Replacement text', replacement);
 
         inputContainer.appendChild(patternInput);
         inputContainer.appendChild(replacementInput);
 
         const rulesContainer = document.getElementById('rulesContainer');
         rulesContainer.appendChild(inputContainer);
+    }
+
+    function createInput(placeholder, value) {
+        const input = document.createElement('input');
+        input.placeholder = placeholder;
+        input.value = value;
+        return input;
     }
 
     function saveRules() {
@@ -178,35 +266,76 @@
 
     function toggleMenu() {
         const menu = document.getElementById('wordReplacerMenu');
+        const toggleButtonIcon = document.querySelector('.fa-pencil');
+
         if (menu.style.display === 'none') {
             loadRules();
             menu.style.display = 'block';
+            toggleButtonIcon.classList.remove('disabled');
+            applyDynamicStyles();
         } else {
             menu.style.display = 'none';
+            toggleButtonIcon.classList.add('disabled');
         }
     }
 
     function createToggleButton() {
-        const button = document.createElement('button');
-        button.textContent = 'Toggle Replacer';
-        button.style.position = 'fixed';
-        button.style.bottom = '10px';
-        button.style.right = '10px';
-        button.style.zIndex = '9998';
-        button.style.backgroundColor = '#282a36';
-        button.style.color = '#f8f8f2';
-        button.style.border = '1px solid #6272a4';
+        const toggleButtonIcon = document.createElement('a');
+        toggleButtonIcon.className = 'fa fa-pencil';
+        toggleButtonIcon.title = 'Toggle Replacer';
+        toggleButtonIcon.href = 'javascript:;';
+        toggleButtonIcon.addEventListener('click', toggleMenu);
 
-        button.addEventListener('click', toggleMenu);
+        toggleButtonIcon.classList.add('disabled');
 
-        document.body.appendChild(button);
+        const toggleButtonContainer = document.createElement('span');
+        toggleButtonContainer.className = 'shortcut brackets-wrap';
+        toggleButtonContainer.appendChild(toggleButtonIcon);
+
+        const waitForHeader = setInterval(() => {
+            const shortcutsContainer = document.getElementById('shortcuts');
+            const statsShortcut = document.getElementById('shortcut-stats');
+            if (shortcutsContainer && statsShortcut) {
+                clearInterval(waitForHeader);
+                shortcutsContainer.insertBefore(toggleButtonContainer, statsShortcut.nextSibling);
+            }
+        }, 100);
     }
 
+
+    applyStaticStyles();
     createMenu();
     createToggleButton();
+    observeStyleChanges();
+
+    function reconnectObserver() {
+        if (observer && !document.body.contains(observer.target)) {
+            observer.disconnect();
+            observer.observe(document.body, observerConfig);
+        }
+    }
+
+    function handleNewPosts() {
+        const newPosts = document.querySelectorAll('.postMessage:not(.processed)');
+        newPosts.forEach(post => {
+            replaceTextInPost(post);
+            post.classList.add('processed');
+        });
+    }
+
+    function handleVisibilityChange() {
+        if (!document.hidden) {
+            reconnectObserver();
+            posts.forEach(replaceTextInPost);
+        }
+    }
+
+    function updateAndProcessPosts() {
+        const posts = document.querySelectorAll('.postMessage');
+        posts.forEach(replaceTextInPost);
+    }
 
     function replaceTextInNode(node) {
-    // Skip if the node is part of a hyperlink
     if (node.parentElement && node.parentElement.tagName === 'A') {
         return;
     }
@@ -216,7 +345,7 @@
             rules.forEach(rule => {
                 if (rule.pattern) {
                     const pattern = new RegExp(rule.pattern, 'gi');
-                    if (node.nodeType === 3) { // Only process text nodes
+                    if (node.nodeType === 3) {
                         node.nodeValue = node.nodeValue.replace(pattern, rule.replacement);
                     }
                 }
@@ -225,10 +354,8 @@
     }
 
     function replaceTextInPost(postElement) {
-        // Process main post content
         Array.from(postElement.childNodes).forEach(replaceTextInNode);
 
-        // Process greentext content
         let greentexts = postElement.querySelectorAll('.quote');
         greentexts.forEach(quoteElement => {
             Array.from(quoteElement.childNodes).forEach(replaceTextInNode);
@@ -257,17 +384,24 @@
         subtree: true
     };
 
-    const observer = new MutationObserver(processMutations);
+    const observer = new MutationObserver((mutations) => {
+        processMutations(mutations);
+        reconnectObserver();
+    });
     observer.observe(document.body, observerConfig);
 
     const posts = document.querySelectorAll('.postMessage');
     posts.forEach(replaceTextInPost);
 
+    updateAndProcessPosts();
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    document.addEventListener('ThreadUpdate', handleNewPosts);
+
     document.addEventListener('click', (e) => {
         if (e.target && e.target.innerText === 'Save and Apply') {
-            setTimeout(() => {
-                posts.forEach(replaceTextInPost);
-            }, 500);
+            setTimeout(updateAndProcessPosts, 500);
         }
     });
 })();

@@ -2,7 +2,7 @@
 // @name         Cycle Playback Speed
 // @version      1.1
 // @description  Cycles through video speed values by pressing 'S' on hovered videos with 4chanX
-// @author       kpg-anon
+// @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
 // @downloadURL  https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/playbackspeed.user.js
 // @updateURL    https://raw.githubusercontent.com/kpg-anon/scripts/main/userscripts/playbackspeed.user.js
