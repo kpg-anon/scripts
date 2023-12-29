@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        4chanX String Replacement
-// @version     2.0
+// @version     2.1
 // @description Replaces text in 4chan posts. Supports literal strings and simplified regex with automatic case-insensitivity. Fully compatible with 4chanX and Oneechan themes.
 // @author      kpganon
 // @namespace   https://github.com/kpg-anon/scripts
@@ -61,6 +61,13 @@
                 display: inline-block;
                 cursor: pointer;
                 border-radius: 2px;
+            }
+            #wordReplacerMenu button:hover {
+                filter: brightness(1.2);
+            }
+
+            #wordReplacerMenu button:active {
+                transform: scale(0.95);
             }
         `);
     }
