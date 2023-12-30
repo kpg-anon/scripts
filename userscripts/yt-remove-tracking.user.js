@@ -1,12 +1,12 @@
 // ==UserScript==
-// @name         Remove YouTube Tracking Parameters and Convert Shorts Links
-// @version      1.2
-// @description  Removes tracking parameters from all YouTube links and converts /shorts/ links to normal (shortened) video links within the share box
+// @name         Remove YouTube Tracking Parameters and Convert Share Links
+// @version      1.3
+// @description  Removes tracking parameters from all YouTube links and converts both /shorts/ and music.youtube.com links to normal (shortened) video links within the share box.
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
 // @downloadURL  https://github.com/kpg-anon/scripts/raw/main/userscripts/yt-remove-tracking.user.js
 // @updateURL    https://github.com/kpg-anon/scripts/raw/main/userscripts/yt-remove-tracking.user.js
-// @match        *://www.youtube.com/*
+// @match        *://*.youtube.com/*
 // @grant        none
 // ==/UserScript==
 
@@ -15,10 +15,11 @@
 
     function removeTrackingParameters(input) {
         if (input && input.value) {
-            let newValue = input.value.replace(/(\&|\?)si=[^&]+/, '').replace(/(\&|\?)pp=[^&]+/, '');
-            newValue = newValue.replace(/^([^?]+)&/, '$1?');
-
-            newValue = newValue.replace(/youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/, 'youtu.be/$1');
+            let newValue = input.value
+                .replace(/(\&|\?)si=[^&]+/, '')
+                .replace(/(\&|\?)pp=[^&]+/, '')
+                .replace(/^([^?]+)&/, '$1?')
+                .replace(/(youtube\.com\/shorts\/|www\.youtube\.com\/watch\?v=|music\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/, 'youtu.be/$2');
 
             if (input.value !== newValue) {
                 input.value = newValue;
