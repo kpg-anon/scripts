@@ -16,10 +16,8 @@ Gui, Font, s32 c%TextColor% Arial
 Gui, Add, Edit, vInterval w200 h50 Center Background%GuiColor% c%GuiColor% Border, 10
 Gui, Font, s16 c%TextColor% Arial
 Gui, Add, Button, gToggleTimer w200 h50 Center vButton1 Background%ButtonColorStart% c%GuiColor% Default, Start
-; Gui, Show, w240 h200, Honeyview Shuffle
 Gui, Show, x0 y147 w240 h200, Honeyview Shuffle
 
-; Escape key to exit
 Hotkey, Escape, GuiClose
 
 return
