@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 
-###############################################################
-# Streamlink helper script for looping a valid streamlink URL #
-###############################################################
+####################################################
+# Streamlink helper script for looping a valid URL #
+####################################################
 
 # Base directory for output path
 OUTPUT_BASE_PATH=~/path/to/STREAMS
