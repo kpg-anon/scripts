@@ -16,10 +16,10 @@
     function removeTrackingParameters(input) {
         if (input && input.value) {
             let newValue = input.value
-                .replace(/(\&|\?)si=[^&]+/, '')
-                .replace(/(\&|\?)pp=[^&]+/, '')
+                .replace(/(?:&|\?)si=[^&]+/, '')
+                .replace(/(?:&|\?)pp=[^&]+/, '')
                 .replace(/^([^?]+)&/, '$1?')
-                .replace(/(youtube\.com\/shorts\/|www\.youtube\.com\/watch\?v=|music\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/, 'youtu.be/$2');
+                .replace(/(?:youtube\.com\/shorts\/|www\.youtube\.com\/watch\?v=|music\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/, 'youtu.be/$1');
 
             if (input.value !== newValue) {
                 input.value = newValue;
@@ -58,7 +58,7 @@
             if (element.tagName.toLowerCase() === 'input') {
                 removeTrackingParameters(element);
             } else if (element.tagName.toLowerCase() === 'a' && /\/watch\?v=/.test(element.href)) {
-                element.href = element.href.replace(/(\&|\?)si=[^&]+/, '').replace(/(\&|\?)pp=[^&]+/, '');
+                element.href = element.href.replace(/(?:&|\?)si=[^&]+/, '').replace(/(?:&|\?)pp=[^&]+/, '');
             }
         });
     }, 50);
