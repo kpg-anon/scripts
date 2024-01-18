@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Remove YouTube Tracking Parameters and Convert Share Links
-// @version      1.3
+// @version      1.4
 // @description  Removes tracking parameters from all YouTube links and converts both /shorts/ and music.youtube.com links to normal (shortened) video links within the share box.
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
