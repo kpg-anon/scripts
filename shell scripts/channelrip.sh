@@ -26,8 +26,8 @@ $YTDLP  \
 	--geo-bypass-country KR \
 	--continue \
 	--sleep-requests 2 \
-        --sleep-interval 5 \
-        --max-sleep-interval 30 \
+  --sleep-interval 5 \
+  --max-sleep-interval 30 \
 	--downloader aria2c \
 	--downloader-args aria2c:"-j 16 -x 16 -s 16 -k 1M" \
 	--playlist-reverse \

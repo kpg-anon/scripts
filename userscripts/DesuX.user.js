@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Desu X - Enhancement Script for Desuarchive.org
-// @version      2.3
-// @description  Combines infinite scrolling, media preview on hover, download functionality, and gallery mode for desuarchive.org. Alt+G to activate gallery mode. Press 'S' while hovering over a thumbnail or in gallery mode to download media with the original filename.
+// @version      2.4
+// @description  Combines infinite scrolling, media preview on hover, download functionality, Fappe Tyme™ and gallery mode for desuarchive.org. Alt+G to activate gallery mode. 'F' to toggle fappe tyme. Press 'S' while hovering over a thumbnail or in gallery mode to download media with the original filename.
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
 // @downloadURL  https://github.com/kpg-anon/scripts/raw/main/userscripts/DesuX.user.js
@@ -17,32 +17,58 @@
 
     GM_addStyle(`
             @import url('https://fonts.googleapis.com/css?family=Roboto');
-        * {
-            font-family: 'Roboto', sans-serif !important;
-        }
-        .paginate, .backlink_container {
-          display: none !important;
-        }
-        #hover-preview {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 100;
-            pointer-events: none;
-            max-width: 100vw;
-            max-height: 100vh;
-        }
-        #hover-preview img,
-        #hover-preview video {
-            width: auto;
-            height: auto;
-            max-width: 100vw;
-            max-height: 100vh;
-            object-fit: contain;
-        }
-        #ig-galleryContainer {
+    * {
+        font-family: 'Roboto', sans-serif !important;
+    }
+    .desux-search-page .paginate {
+        display: none !important;
+    }
+    .desux-search-page article.thread {
+        padding: 0 !important;
+        border-top: none !important;
+    }
+    .hidden-by-desux {
+        visibility: hidden;
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+    [data-hidden="true"] {
+      opacity: 0;
+      pointer-events: none;
+      user-select: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      clip-path: inset(100%);
+    }
+    #hover-preview {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+        pointer-events: none;
+        max-width: 100vw;
+        max-height: 100vh;
+    }
+    #hover-preview img,
+    #hover-preview video {
+        width: auto;
+        height: auto;
+        max-width: 100vw;
+        max-height: 100vh;
+        object-fit: contain;
+    }
+    #ig-galleryContainer {
         position: fixed;
         top: 0;
         left: 0;
@@ -209,6 +235,31 @@
     const preview = document.createElement('div');
     preview.id = 'hover-preview';
     document.body.appendChild(preview);
+
+    function togglePostVisibility() {
+        const posts = document.querySelectorAll('.post_wrapper');
+        posts.forEach(post => {
+            const hasImage = post.querySelector('.post_file') !== null;
+            if (!hasImage) {
+                if(post.getAttribute('data-hidden') === 'true') {
+                    post.removeAttribute('data-hidden');
+                } else {
+                    post.setAttribute('data-hidden', 'true');
+                }
+            }
+        });
+    }
+
+    function addPageSpecificClass() {
+        const urlPath = window.location.pathname;
+        const bodyClass = document.body.classList;
+
+        if(urlPath.includes('/search/')) {
+            bodyClass.add('desux-search-page');
+        } else if(urlPath.match(/\/\w+\/thread\/\d+/)) {
+            bodyClass.add('desux-thread-page');
+        }
+    }
 
     function attachHoverPreviewAndDownload() {
         document.querySelectorAll('.thread .thread_image_link, .post_wrapper .thread_image_link').forEach(anchor => {
@@ -525,6 +576,9 @@
             navigateGallery(-1);
         }
     }
+    if ((e.key === 'F' || e.key === 'f') && /https:\/\/desuarchive\.org\/.*\/thread\/.*/.test(window.location.href)) {
+        togglePostVisibility();
+    }
 });
 
     window.addEventListener('scroll', function() {
@@ -532,7 +586,8 @@
             loadMoreContent();
         }
     });
-
+    
+    addPageSpecificClass();
     attachHoverPreviewAndDownload();
     collectMediaItems();
 })();
