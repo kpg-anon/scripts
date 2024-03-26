@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Desu X - Enhancement Script for Desuarchive.org
-// @version      2.4
+// @version      2.5
 // @description  Combines infinite scrolling, media preview on hover, download functionality, Fappe Tyme™ and gallery mode for desuarchive.org. Alt+G to activate gallery mode. 'F' to toggle fappe tyme. Press 'S' while hovering over a thumbnail or in gallery mode to download media with the original filename.
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
@@ -576,17 +576,22 @@
             navigateGallery(-1);
         }
     }
-    if ((e.key === 'F' || e.key === 'f') && /https:\/\/desuarchive\.org\/.*\/thread\/.*/.test(window.location.href)) {
+      
+    if ((e.key === 'F' || e.key === 'f') && !e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey &&
+        e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' &&
+        /https:\/\/desuarchive\.org\/.*\/thread\/.*/.test(window.location.href)) {
+
         togglePostVisibility();
+        e.preventDefault();
     }
-});
+    });
 
     window.addEventListener('scroll', function() {
         if (window.location.pathname.includes('/search/') && window.scrollY + window.innerHeight >= document.body.scrollHeight - 90) {
             loadMoreContent();
         }
     });
-    
+
     addPageSpecificClass();
     attachHoverPreviewAndDownload();
     collectMediaItems();
