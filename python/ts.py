@@ -56,7 +56,7 @@ def main(args):
         # Handle YouTube URL
         video_url, audio_url = get_direct_urls(input_files[0])
         vf_option = f"{rotation_for_youtube}lavfi=[split=3[a][b:lit][c];[a][b:lit][c]hstack=inputs=3]" if rotation_arg else "lavfi=[split=3[a][b:lit][c];[a][b:lit][c]hstack=inputs=3]"
-        mpv_command = f'mpv --speed=0.4 --loop=inf "{video_url}" --audio-file="{audio_url}" --vf="{vf_option}"'
+        mpv_command = f'mpv --speed=0.4 --loop=inf --fullscreen "{video_url}" --audio-file="{audio_url}" --vf="{vf_option}"'
     else:
         # Handle local files
         if len(input_files) == 1:
@@ -64,7 +64,7 @@ def main(args):
         else:
             external_files = '"' + '";"'.join(input_files[1:]) + '"'
         stack_inputs = "[rot1][rot2][rot3]" if rotation_arg else "[vid1][vid2][vid3]"
-        mpv_command = f'mpv --speed=0.4 --loop=inf --lavfi-complex="{rotation_for_local}{stack_inputs}hstack=inputs=3[vo];[aid1][aid2][aid3]amix=inputs=3[ao]" {input_file} --external-files={external_files}'
+        mpv_command = f'mpv --speed=0.4 --loop=inf --fullscreen --lavfi-complex="{rotation_for_local}{stack_inputs}hstack=inputs=3[vo];[aid1][aid2][aid3]amix=inputs=3[ao]" {input_file} --external-files={external_files}'
 
     subprocess.run(mpv_command, shell=True)
 
