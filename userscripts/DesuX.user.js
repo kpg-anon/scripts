@@ -5,8 +5,8 @@
 // @author       kpganon
 // @license      MIT
 // @namespace    https://github.com/kpg-anon/scripts
-// @downloadURL  https://greasyfork.org/scripts/483282/code/Desu%20X%20-%20Enhancement%20Script%20for%20Desuarchiveorg.user.js
-// @updateURL    https://greasyfork.org/scripts/483282/code/Desu%20X%20-%20Enhancement%20Script%20for%20Desuarchiveorg.meta.js
+// @downloadURL  https://github.com/kpg-anon/scripts/raw/main/userscripts/DesuX.user.js
+// @updateURL    https://github.com/kpg-anon/scripts/raw/main/userscripts/DesuX.user.js
 // @match        https://desuarchive.org/*
 // @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest
