@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         X Media Carousel Fix
-// @version      1.0
+// @version      1.1
 // @description  Reverts X's horizontal-scrolling post media carousel back to the old thumbnail grid, so every image in a post is visible at once.
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
@@ -162,6 +162,24 @@
         max-height: none !important;
         overflow: visible !important;
     }
+
+    /* X reserves the carousel's shape with the percentage-padding hack -
+       height:0 plus a padding-bottom sized to the media. The grid is shorter
+       than the carousel was, so that padding survives as a tall empty band
+       under the post. Drop it and let the box take its height from the grid
+       (height:auto comes from [data-xgrid-wrap], which is set alongside). */
+    [data-xgrid-pad] {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* The hack lifts its content out of flow to overlay that padding. With the
+       padding gone the content has to flow again, or the media block measures
+       zero and the post's text and action bar render on top of the grid. */
+    [data-xgrid-abs] {
+        position: relative !important;
+        inset: auto !important;
+    }
     ${CONFIG.hideArrows ? `
     /* Arrows are meaningless once everything is on screen. Which element they
        hang off varies by frontend, so they're tagged in JS rather than matched
@@ -232,13 +250,19 @@
         }
     }
 
-    function convert(scroller) {
-        applyCount(scroller);
-        tagArrows(scroller);
-        // The carousel sits inside a fixed-aspect, overflow-hidden box. If any
-        // is left intact the taller grid gets cropped - which shows up as the
-        // bottom row being sliced off square. How deep that box sits varies by
-        // frontend, so clear every clipping ancestor up to the post itself.
+    // The carousel sits inside a fixed-aspect, overflow-hidden box. If any is
+    // left intact the taller grid gets cropped - which shows up as the bottom
+    // row being sliced off square. How deep that box sits varies by frontend,
+    // so clear every constraining ancestor up to the post itself.
+    //
+    // Safe to re-run: every branch only ever adds a marker, and a box already
+    // neutralised no longer matches the test that tagged it.
+    function tagWrappers(scroller) {
+        // Absolutely-positioned ancestors seen so far. They're only put back in
+        // flow once a padding hack turns up above them - that's what they were
+        // lifted out to overlay. Left unconditional, this would flatten
+        // absolute positioning that the post legitimately relies on.
+        const lifted = [];
         let el = scroller.parentElement;
         for (let i = 0; i < 6 && el && el !== document.body; i++, el = el.parentElement) {
             const cs = getComputedStyle(el);
@@ -249,8 +273,26 @@
                 (clips && el.clientHeight < scroller.scrollHeight - 2)) {
                 el.dataset.xgridWrap = '';
             }
+            // The padding hack, identified by the box being essentially all
+            // padding - its content is out of flow, so nothing else can leave
+            // a box whose own content height rounds to zero. A container with
+            // ordinary padding around real content can't be mistaken for it.
+            const pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+            if (pad > 0 && el.clientHeight - pad < 4) {
+                el.dataset.xgridPad = '';
+                el.dataset.xgridWrap = '';   // the hack pins height:0 as well
+                lifted.forEach(a => { a.dataset.xgridAbs = ''; a.dataset.xgridWrap = ''; });
+                lifted.length = 0;
+            }
+            if (cs.position === 'absolute') lifted.push(el);
             if (el.tagName === 'ARTICLE') break;
         }
+    }
+
+    function convert(scroller) {
+        applyCount(scroller);
+        tagArrows(scroller);
+        tagWrappers(scroller);
     }
 
     function scan() {
@@ -269,6 +311,8 @@
         document.querySelectorAll('[data-xgrid]').forEach(grid => {
             applyCount(grid);
             tagArrows(grid);      // arrows can mount after the carousel does
+            tagWrappers(grid);    // X sizes the wrappers once the media loads,
+                                  // which can be after the first conversion
             dedupeOverlays(grid);
         });
     }
