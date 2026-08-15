@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         X Media Downloader
-// @version      2026.4.2.2
+// @version      1.0.0
 // @description  Adds a download button to posts on X
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
@@ -22,16 +22,31 @@
  * Authors: goemon2017, 天音, Tiande, molanp, 人民的勤务员@ChinaGodMan
  * License: MIT — Copyright © 2024-2025 ChinaGodMan & molanp
  *
- * Local changes:
- *  - restyled .tmd-img hover buttons, and the settings/chooser dark
- *  - trimmed the localized metadata out of the header
- *  - a post's link card no longer blocks the download; upstream rejected every
- *    native video post on that check
- *  - removed the quoted-post chooser. It appeared whenever a quoted post had
- *    media, even when the clicked post had its own, so it fired on nearly every
- *    quote post. The post is now detected instead: a thumbnail button reads the
- *    owning post id from its own /photo/ link, and the post-level button uses
- *    the post's own media, falling back to the quoted post only when it has none.
+ * There is no metadata tag for a release date. Violentmonkey reads only name,
+ * namespace, version, author, description, icon, homepageURL, supportURL,
+ * downloadURL, updateURL, match, include, exclude, require, resource, grant,
+ * connect, run-at, noframes, inject-into and unwrap. Anything else in the
+ * header is ignored, so release dates are recorded here instead.
+ *
+ * Versioning restarts at 1.0.0 with this fork. Upstream used a date-shaped
+ * @version (2026.4.2.2); this one is an ordinary major.minor.patch. Bump the
+ * patch for a fix, the minor for behaviour, and Violentmonkey will offer the
+ * update.
+ *
+ * ---------------------------------------------------------------------------
+ * 1.0.0 - 2026-08-15   forked from upstream 2026.4.2.2 (released 2025-12-02)
+ *
+ *   - restyled the .tmd-img hover buttons, and the quoted-post chooser dark
+ *   - trimmed the localized metadata out of the header
+ *   - a post's link card no longer blocks the download; upstream rejected
+ *     every native video post on that check
+ *   - removed the quoted-post chooser. It appeared whenever a quoted post had
+ *     media, even when the clicked post had its own, so it fired on nearly
+ *     every quote post. The post is detected instead: a thumbnail button reads
+ *     the owning post id from its own /photo/ link, and the post-level button
+ *     uses the post's own media, falling back to the quoted post only when it
+ *     has none. {status-id} and the user name follow the chosen post.
+ * ---------------------------------------------------------------------------
  *
  * Everything else tracks upstream.
  */
