@@ -22,9 +22,17 @@
  * Authors: goemon2017, 天音, Tiande, molanp, 人民的勤务员@ChinaGodMan
  * License: MIT — Copyright © 2024-2025 ChinaGodMan & molanp
  *
- * Local changes: restyled .tmd-img hover buttons, trimmed the localized
- * metadata out of the header, and stopped a post's link card from blocking the
- * download (upstream rejects every native video post on that check).
+ * Local changes:
+ *  - restyled .tmd-img hover buttons, and the settings/chooser dark
+ *  - trimmed the localized metadata out of the header
+ *  - a post's link card no longer blocks the download; upstream rejected every
+ *    native video post on that check
+ *  - removed the quoted-post chooser. It appeared whenever a quoted post had
+ *    media, even when the clicked post had its own, so it fired on nearly every
+ *    quote post. The post is now detected instead: a thumbnail button reads the
+ *    owning post id from its own /photo/ link, and the post-level button uses
+ *    the post's own media, falling back to the quoted post only when it has none.
+ *
  * Everything else tracks upstream.
  */
 
@@ -132,8 +140,15 @@ const TMD = (function () {
                 let btn_group = article.querySelector('div[role="group"]:last-of-type')
                 let btn_share = Array.from(btn_group.querySelectorAll(':scope>div>div')).pop().parentNode
                 imgs.forEach(img => {
-                    let index = img.href.split('/status/').pop().split('/').pop()
-                    let is_exist = history.indexOf(status_id) >= 0
+                    // A photo link points at the post that owns the photo:
+                    // /{user}/status/{id}/photo/{n}. When the article also
+                    // renders a quoted post, that id is the quoted post's, not
+                    // the outer one's. Reading it here makes each thumbnail
+                    // button unambiguous about what it downloads.
+                    let parts = img.href.split('/status/').pop().split('/')
+                    let img_status_id = parts.shift() || status_id
+                    let index = parts.pop()
+                    let is_exist = history.indexOf(img_status_id) >= 0
                     let btn_down = document.createElement('div')
                     btn_down.innerHTML = '<div><div><svg viewBox="0 0 24 24" style="width: 18px; height: 18px;">' + this.svg + '</svg></div></div>'
                     btn_down.classList.add('tmd-down', 'tmd-img')
@@ -141,7 +156,7 @@ const TMD = (function () {
                     img.parentNode.appendChild(btn_down)
                     btn_down.onclick = e => {
                         e.preventDefault()
-                        this.click(btn_down, status_id, is_exist, index)
+                        this.click(btn_down, img_status_id, is_exist, index)
                     }
                 })
             }
@@ -160,146 +175,6 @@ const TMD = (function () {
                 btn_down.onclick = () => this.click(btn_down, status_id, is_exist)
             })
         },
-        selectTweetDialog: function (originalUser, quotedUser) {
-            return new Promise((resolve) => {
-                // 创建遮罩层
-                const overlay = document.createElement('div')
-                overlay.style.cssText = `
-                    position: fixed;
-                    left: 0;
-                    top: 0;
-                    width: 100%;
-                    height: 100%;
-                    background-color: rgba(0, 0, 0, 0.7);
-                    z-index: 10000;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                `
-
-                // 创建对话框
-                const dialog = document.createElement('div')
-                dialog.style.cssText = `
-                    background: #16181C;
-                    border: 1px solid #2F3336;
-                    border-radius: 16px;
-                    padding: 24px;
-                    width: 400px;
-                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-                    color: #E7E9EA;
-                    font-family: system-ui, -apple-system, sans-serif;
-                `
-
-                // 添加标题
-                const title = document.createElement('h3')
-                title.textContent = `${lang.choose}`
-                title.style.cssText = `
-                    margin-top: 0;
-                    margin-bottom: 20px;
-                    text-align: center;
-                    color: #E7E9EA;
-                `
-
-                // 添加选项按钮容器
-                const buttonsContainer = document.createElement('div')
-                buttonsContainer.style.cssText = `
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
-                `
-
-                // 原始推文按钮
-                const originalBtn = document.createElement('button')
-                originalBtn.textContent = `${lang.original} (by ${originalUser})`
-                originalBtn.style.cssText = `
-                    background: #1DA1F2;
-                    color: white;
-                    border: none;
-                    border-radius: 50px;
-                    padding: 16px;
-                    font-size: 16px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: background 0.2s;
-                `
-                originalBtn.addEventListener('mouseenter', () => {
-                    originalBtn.style.background = '#1a91da'
-                })
-                originalBtn.addEventListener('mouseleave', () => {
-                    originalBtn.style.background = '#1DA1F2'
-                })
-                originalBtn.addEventListener('click', () => {
-                    resolve('original')
-                    document.body.removeChild(overlay)
-                })
-
-                // 引用推文按钮
-                const quotedBtn = document.createElement('button')
-                quotedBtn.textContent = `${lang.quote} (by ${quotedUser})`
-                quotedBtn.style.cssText = `
-                    background: transparent;
-                    color: #1DA1F2;
-                    border: 2px solid #1DA1F2;
-                    border-radius: 50px;
-                    padding: 16px;
-                    font-size: 16px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                `
-                quotedBtn.addEventListener('mouseenter', () => {
-                    quotedBtn.style.background = 'rgba(29, 161, 242, 0.1)'
-                })
-                quotedBtn.addEventListener('mouseleave', () => {
-                    quotedBtn.style.background = 'transparent'
-                })
-                quotedBtn.addEventListener('click', () => {
-                    resolve('quoted')
-                    document.body.removeChild(overlay)
-                })
-
-                // 取消按钮
-                const cancelBtn = document.createElement('button')
-                cancelBtn.textContent = `${lang.cancel}`
-                cancelBtn.style.cssText = `
-                    background: transparent;
-                    color: #71767B;
-                    border: none;
-                    padding: 12px;
-                    font-size: 14px;
-                    cursor: pointer;
-                    margin-top: 8px;
-                    transition: color 0.2s;
-                `
-                cancelBtn.addEventListener('mouseenter', () => {
-                    cancelBtn.style.color = '#E7E9EA'
-                })
-                cancelBtn.addEventListener('mouseleave', () => {
-                    cancelBtn.style.color = '#71767B'
-                })
-                cancelBtn.addEventListener('click', () => {
-                    resolve(null)
-                    document.body.removeChild(overlay)
-                })
-
-                // 组装对话框
-                buttonsContainer.appendChild(originalBtn)
-                buttonsContainer.appendChild(quotedBtn)
-                buttonsContainer.appendChild(cancelBtn)
-                dialog.appendChild(title)
-                dialog.appendChild(buttonsContainer)
-                overlay.appendChild(dialog)
-                document.body.appendChild(overlay)
-
-                // 点击遮罩层外部关闭对话框
-                overlay.addEventListener('click', (e) => {
-                    if (e.target === overlay) {
-                        resolve(null)
-                        document.body.removeChild(overlay)
-                    }
-                })
-            })
-        },
         click: async function (btn, status_id, is_exist, index) {
             if (btn.classList.contains('loading')) return
             this.status(btn, 'loading')
@@ -307,42 +182,35 @@ const TMD = (function () {
             let save_history = await GM_getValue('save_history', true)
             let json = await this.fetchJson(status_id)
 
-            // 检查是否存在引用推文
-            let hasQuotedMedia = json.quoted_status_result?.result?.legacy?.media ||
-                json.quoted_status_result?.result?.legacy?.extended_entities?.media
+            // Work out which post the media belongs to instead of asking.
+            //
+            // Upstream showed a chooser whenever the quoted post had media, even
+            // when the post being clicked had its own. That fires on every quote
+            // post that carries an image, which is most of them.
+            //
+            // A thumbnail button already passes the id taken from its photo
+            // link, so by this point status_id is the post that owns the image
+            // and the outer branch is taken. The fallback only matters for the
+            // post-level button on a quote post that has no media of its own.
+            let quoted = json.quoted_status_result?.result
+            let outer_media = json.legacy?.extended_entities?.media
+            let quoted_media = quoted?.legacy?.extended_entities?.media
+            let use_quoted = !(Array.isArray(outer_media) && outer_media.length > 0)
+                && Array.isArray(quoted_media) && quoted_media.length > 0
 
-            let tweet
-            let user
-            if (hasQuotedMedia) {
-                // 存在引用媒体，需要用户选择
-                let originalUser = `${json.core?.user_results?.result?.legacy?.name} @${json.core?.user_results?.result?.legacy?.screen_name}`
-                let quotedUser = `${json.quoted_status_result?.result?.core?.user_results?.result?.legacy?.name} @${json.quoted_status_result?.result?.core?.user_results?.result?.legacy?.screen_name}`
-
-                let choice = await this.selectTweetDialog(originalUser, quotedUser)
-                if (!choice) {
-                    this.status(btn, 'download', lang.download)
-                    return // 用户取消选择
-                }
-
-                if (choice === 'quoted') {
-                    // 使用引用推文
-                    tweet = json.quoted_status_result.result.legacy
-                    user = json.quoted_status_result.result.core.user_results.result.legacy
-                } else {
-                    // 使用原始推文
-                    tweet = json.legacy
-                    user = json.core.user_results.result.legacy
-                }
-            } else {
-                // 没有引用媒体，直接使用原始推文
-                tweet = json.legacy
-                user = json.core.user_results.result.legacy
-            }
+            let tweet = use_quoted ? quoted.legacy : json.legacy
+            // The name in the filename has to follow the post the media came
+            // from, not whoever quoted it.
+            let user = use_quoted
+                ? quoted.core.user_results.result.legacy
+                : json.core.user_results.result.legacy
 
             let invalid_chars = { '\\': '＼', '\/': '／', '\|': '｜', '<': '＜', '>': '＞', ':': '：', '*': '＊', '?': '？', '"': '＂', '\u200b': '', '\u200c': '', '\u200d': '', '\u2060': '', '\ufeff': '', '🔞': '' }
             let datetime = out.match(/\{date-time(-local)?:[^{}]+\}/) ? out.match(/\{date-time(?:-local)?:([^{}]+)\}/)[1].replace(/[\\/|<>*?:"]/g, v => invalid_chars[v]) : 'YYYYMMDD-hhmmss'
             let info = {}
-            info['status-id'] = status_id
+            // Follows the chosen post, so the filename cannot name one post and
+            // contain another post's media.
+            info['status-id'] = tweet.id_str || status_id
             info['user-name'] = user.name.replace(/([\\/|*?:"\u200b-\u200d\u2060\ufeff]|🔞)/g, v => invalid_chars[v])
             info['user-id'] = user.screen_name
             info['date-time'] = this.formatDate(tweet.created_at, datetime)
