@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         X Media Downloader
 // @version      1.0.0
-// @modified     2026-08-15
+// @modified     2026.08.15
 // @description  Adds a download button to posts on X
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
@@ -40,7 +40,7 @@ const TMD = (function () {
                 this.storage(history)
                 this.storage_obsolete(true)
             } else history = await this.storage()
-            show_sensitive = GM_getValue('show_sensitive', false)
+            show_sensitive = GM_getValue('show_sensitive', true)
             document.head.insertAdjacentHTML('beforeend', '<style>' + this.css + (show_sensitive ? this.css_ss : '') + '</style>')
             let observer = new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(node => this.detect(node))))
             observer.observe(document.body, { childList: true, subtree: true })
@@ -226,7 +226,7 @@ const TMD = (function () {
                     info.out = (out.replace(/\.?\{file-ext\}/, '') + ((medias.length > 1 || index) && !out.match('{file-name}') ? '-' + (index ? index - 1 : i) : '') + '.{file-ext}').replace(/\{([^{}:]+)(:[^{}]+)?\}/g, (match, name) => info[name])
                     return { url: info.url, name: info.out }
                 })
-                this.downloader.add(tasks, btn, save_history, is_exist, status_id, GM_getValue('enable_packaging', true))
+                this.downloader.add(tasks, btn, save_history, is_exist, status_id, GM_getValue('enable_packaging', false))
             } else {
                 this.status(btn, 'failed', 'MEDIA_NOT_FOUND')
             }
@@ -461,14 +461,14 @@ const TMD = (function () {
             }
             let show_sensitive_label = $element(options, 'label', 'display: block; margin: 10px;', lang.dialog.show_sensitive)
             let show_sensitive_input = $element(show_sensitive_label, 'input', 'float: left;', 'checkbox')
-            show_sensitive_input.checked = await GM_getValue('show_sensitive', false)
+            show_sensitive_input.checked = await GM_getValue('show_sensitive', true)
             show_sensitive_input.onchange = () => {
                 show_sensitive = show_sensitive_input.checked
                 GM_setValue('show_sensitive', show_sensitive)
             }
             let show_enable_packaging = $element(options, 'label', 'display: block; margin: 10px;', lang.enable_packaging)
             let show_enable_packaging_input = $element(show_enable_packaging, 'input', 'float: left;', 'checkbox')
-            show_enable_packaging_input.checked = await GM_getValue('enable_packaging', true)
+            show_enable_packaging_input.checked = await GM_getValue('enable_packaging', false)
             show_enable_packaging_input.onchange = () => {
                 GM_setValue('enable_packaging', show_enable_packaging_input.checked)
             }
