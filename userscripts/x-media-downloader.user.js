@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         X Media Downloader
-// @version      1.0.0
-// @modified     2026.08.15
+// @version      1.0.1
+// @modified     2026.08.26
 // @description  Adds a download button to posts on X
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
@@ -26,6 +26,7 @@
 
 /* jshint esversion: 8 */
 const filename = 'twitter_{user-name}(@{user-id})_{date-time}_{status-id}_{file-type}'
+const invalid_chars = { '\\': '＼', '\/': '／', '\|': '｜', '<': '＜', '>': '＞', ':': '：', '*': '＊', '?': '？', '"': '＂', '\u200b': '', '\u200c': '', '\u200d': '', '\u2060': '', '\ufeff': '', '🔞': '' }
 const TMD = (function () {
     let lang, host, history, show_sensitive, is_tweetdeck
     return {
@@ -69,13 +70,29 @@ const TMD = (function () {
         generateMarkdown: async function (tweet_id, fetch = true) {
             if (!fetch) return `[Tweet] - ${tweet_id} (https://x.com/i/web/status/${tweet_id})`
             let json = await this.fetchJson(tweet_id)
-            let tweet = json.quoted_status_result?.result?.legacy?.media
-                || json.quoted_status_result?.result?.legacy
-                || json.legacy
-            let user = json.core.user_results.result.legacy
+            let source = this.sourceOf(json)
+            let tweet = source.legacy
+            let user = source.core.user_results.result.legacy
             let user_name = user.name.replace(/([\\/|*?:"\u200b-\u200d\u2060\ufeff]|🔞)/g, v => invalid_chars[v])
             let full_text = tweet.full_text.split('\n').join(' ').replace(/\s*https:\/\/t\.co\/\w+/g, '').replace(/[\\/|<>*?:"\u200b-\u200d\u2060\ufeff]/g, v => invalid_chars[v])
             return `[${user_name} (@${user.screen_name})](https://x.com/i/web/status/${tweet_id})\n>  ${full_text}\n`
+        },
+        // A quoted post whose replies are restricted comes back as
+        // TweetWithVisibilityResults, which holds the real tweet in .tweet.
+        // fetchJson already unwraps that for the outer post; the quoted one
+        // needs the same treatment or its legacy block reads as undefined.
+        quotedOf: function (json) {
+            let result = json.quoted_status_result?.result
+            return result?.tweet || result
+        },
+        // The post a download should come from: the clicked one when it carries
+        // media of its own, otherwise the post it quotes.
+        sourceOf: function (json) {
+            let outer_media = json.legacy?.extended_entities?.media
+            if (Array.isArray(outer_media) && outer_media.length > 0) return json
+            let quoted = this.quotedOf(json)
+            let quoted_media = quoted?.legacy?.extended_entities?.media
+            return Array.isArray(quoted_media) && quoted_media.length > 0 ? quoted : json
         },
         detect: function (node) {
             let article = node.tagName == 'ARTICLE' && node || node.tagName == 'DIV' && (node.querySelector('article') || node.closest('article'))
@@ -85,17 +102,30 @@ const TMD = (function () {
         },
         addButtonTo: function (article) {
             if (article.dataset.detected) return
-            article.dataset.detected = 'true'
             let media_selector = [
                 'a[href*="/photo/1"]',
                 'div[role="progressbar"]',
                 'button[data-testid="playButton"]',
+                // A video post matches nothing else once it has finished
+                // loading: playButton is not rendered on a status page and the
+                // progressbar only exists while the player is coming up. These
+                // two are what the loaded player leaves behind.
+                'div[data-testid="videoComponent"]',
+                'div[data-testid="videoPlayer"]',
                 'a[href="/settings/content_you_see"]', //hidden content
                 'div.media-image-container', // for tweetdeck
                 'div.media-preview-container', // for tweetdeck
                 'div[aria-labelledby]>div:first-child>div[role="button"][tabindex="0"]' //for audio (experimental)
             ]
             let media = article.querySelector(media_selector.join(','))
+            let imgs = article.querySelectorAll('a[href*="/photo/"]')
+            // X inserts the article before it inserts the player, so the first
+            // pass over a video post sees no media at all. Marking the article
+            // as done at that point is what left video posts with no download
+            // button. Leave it unmarked until there is something to attach to,
+            // and a later mutation on the same article tries again.
+            if (!media && imgs.length < 2) return
+            article.dataset.detected = 'true'
             let current_tweet_id = document.location.href.includes('/status/')
                 ? document.location.href.split('/status/').pop().split('/').shift()
                 : undefined
@@ -122,7 +152,6 @@ const TMD = (function () {
                     if (btn_show) btn_show.click()
                 }
             }
-            let imgs = article.querySelectorAll('a[href*="/photo/"]')
             if (imgs.length > 1) {
                 let status_id = current_tweet_id || article.querySelector('a[href*="/status/"]').href.split('/status/').pop().split('/').shift()
                 let btn_group = article.querySelector('div[role="group"]:last-of-type')
@@ -178,22 +207,14 @@ const TMD = (function () {
             //
             // A thumbnail button already passes the id taken from its photo
             // link, so by this point status_id is the post that owns the image
-            // and the outer branch is taken. The fallback only matters for the
-            // post-level button on a quote post that has no media of its own.
-            let quoted = json.quoted_status_result?.result
-            let outer_media = json.legacy?.extended_entities?.media
-            let quoted_media = quoted?.legacy?.extended_entities?.media
-            let use_quoted = !(Array.isArray(outer_media) && outer_media.length > 0)
-                && Array.isArray(quoted_media) && quoted_media.length > 0
-
-            let tweet = use_quoted ? quoted.legacy : json.legacy
+            // and sourceOf returns that post. The quoted branch only matters for
+            // the post-level button on a quote post with no media of its own.
+            let source = this.sourceOf(json)
+            let tweet = source.legacy
             // The name in the filename has to follow the post the media came
             // from, not whoever quoted it.
-            let user = use_quoted
-                ? quoted.core.user_results.result.legacy
-                : json.core.user_results.result.legacy
+            let user = source.core.user_results.result.legacy
 
-            let invalid_chars = { '\\': '＼', '\/': '／', '\|': '｜', '<': '＜', '>': '＞', ':': '：', '*': '＊', '?': '？', '"': '＂', '\u200b': '', '\u200c': '', '\u200d': '', '\u2060': '', '\ufeff': '', '🔞': '' }
             let datetime = out.match(/\{date-time(-local)?:[^{}]+\}/) ? out.match(/\{date-time(?:-local)?:([^{}]+)\}/)[1].replace(/[\\/|<>*?:"]/g, v => invalid_chars[v]) : 'YYYYMMDD-hhmmss'
             let info = {}
             // Follows the chosen post, so the filename cannot name one post and
