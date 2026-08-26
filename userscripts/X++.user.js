@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         X++
-// @version      1.1.0
+// @version      1.1.1
 // @modified     2026.08.26
 // @description  Widens and centres the timeline, restores the media grid, and adds a download button to posts on X.
 // @author       kpganon
@@ -719,6 +719,18 @@ const TMD = (function () {
             let quoted_media = quoted?.legacy?.extended_entities?.media
             return Array.isArray(quoted_media) && quoted_media.length > 0 ? quoted : json
         },
+        // The id of the post an article renders. Upstream took this from the
+        // page URL whenever it held /status/, which stamps one id on every
+        // article the page shows: on a status page the replies and the posts
+        // listed beside it all inherited the focused post's id, so they came up
+        // already ticked as downloaded and their button would have fetched the
+        // focused post's media. Every article carries its own permalink on its
+        // timestamp, so read it from there instead.
+        statusIdOf: function (article) {
+            let time = article.querySelector('a[href*="/status/"] time')
+            let link = time ? time.closest('a[href*="/status/"]') : article.querySelector('a[href*="/status/"]')
+            return link && link.href.split('/status/').pop().split('/').shift()
+        },
         detect: function (node) {
             let article = node.tagName == 'ARTICLE' && node || node.tagName == 'DIV' && (node.querySelector('article') || node.closest('article'))
             if (article) this.addButtonTo(article)
@@ -750,12 +762,13 @@ const TMD = (function () {
             // button. Leave it unmarked until there is something to attach to,
             // and a later mutation on the same article tries again.
             if (!media && imgs.length < 2) return
+            let status_id = this.statusIdOf(article)
+            // With no permalink there is nothing to attribute the media to, and
+            // a guessed id would download a different post. Leaving the article
+            // unmarked means a later mutation tries again.
+            if (!status_id) return
             article.dataset.detected = 'true'
-            let current_tweet_id = document.location.href.includes('/status/')
-                ? document.location.href.split('/status/').pop().split('/').shift()
-                : undefined
             if (media) {
-                let status_id = current_tweet_id || article.querySelector('a[href*="/status/"]').href.split('/status/').pop().split('/').shift()
                 let btn_group = article.querySelector('div[role="group"]:last-of-type, ul.tweet-actions, ul.tweet-detail-actions')
                 let btn_share = Array.from(btn_group.querySelectorAll(':scope>div>div, li.tweet-action-item>a, li.tweet-detail-action-item>a')).pop().parentNode
                 let btn_down = btn_share.cloneNode(true)
@@ -778,7 +791,6 @@ const TMD = (function () {
                 }
             }
             if (imgs.length > 1) {
-                let status_id = current_tweet_id || article.querySelector('a[href*="/status/"]').href.split('/status/').pop().split('/').shift()
                 let btn_group = article.querySelector('div[role="group"]:last-of-type')
                 let btn_share = Array.from(btn_group.querySelectorAll(':scope>div>div')).pop().parentNode
                 imgs.forEach(img => {
