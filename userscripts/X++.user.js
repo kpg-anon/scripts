@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         X++
-// @version      1.0.0
+// @version      1.1.0
 // @modified     2026.08.26
 // @description  Widens and centres the timeline, restores the media grid, and adds a download button to posts on X.
 // @author       kpganon
@@ -99,6 +99,15 @@
            same flex row. */
         [data-testid="primaryColumn"] article [role="group"] {
             max-width: none !important;
+        }
+
+        /* The slider is fixed at z-index 9999, so it floats on top of X's photo
+           viewer and of every other full-screen dialog. They all mount inside
+           #layers and carry aria-modal, which is a hook that needs no script and
+           reverses itself when the overlay closes. The !important is required:
+           the slider sets its own display from an inline style. */
+        body:has(#layers [aria-modal="true"]) > #xct-zoom {
+            display: none !important;
         }
 
         /* A post with one portrait image is sized by an inline max-width and
