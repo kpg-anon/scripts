@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         X Widescreen Fix
-// @version      1.0.0
-// @modified     2026.08.25
+// @version      1.0.1
+// @modified     2026.08.26
 // @description  Centers X's timeline on the viewport, widens it, strips the right sidebar down to the search field, and adds a zoom slider.
 // @author       kpganon
 // @namespace    https://github.com/kpg-anon/scripts
@@ -87,8 +87,17 @@
         }
 
         /* A post with one portrait image is sized by an inline max-width and
-           would otherwise sit against the left edge of the wider column. */
+           would otherwise sit against the left edge of the wider column.
+
+           The width is required. This wrapper is a stretched item of a column
+           flex container, and an auto cross-axis margin cancels the stretch, so
+           the item falls back to its content's own width. A photo has an img to
+           measure; a video is a padding-bottom aspect box with absolutely
+           positioned children and measures 0, which collapsed every video
+           player in the timeline to a 2px dot. Setting the width back to 100%
+           restores the stretched size, and the inline max-width still caps it. */
         [data-testid="primaryColumn"] article div[style*="max-width"]:has([data-testid="tweetPhoto"]) {
+            width: 100% !important;
             margin-left: auto !important;
             margin-right: auto !important;
         }
